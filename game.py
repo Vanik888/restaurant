@@ -1,7 +1,9 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
+import os
 import pygame
+
 from pygame import *
 from blocks import *
 from player import *
@@ -12,7 +14,19 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004000"
 
 
+def read_commands(commands_abs_path):
+    with open(commands_abs_path, 'r') as f:
+        # if os.stat(f).st_size == 0:
+        #     return None
+        # else:
+        smbl = int(f.readline())
+        return smbl
+            # return f.readline()
+
+
+
 def main():
+    cmd_file = '/home/vanik/darwin/speach-detector/speech-client/stat/cmd'
     pygame.init() # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode(DISPLAY) # Создаем окошко
     pygame.display.set_caption("Super Mario Boy") # Пишем в шапку
@@ -58,6 +72,29 @@ def main():
         for e in pygame.event.get(): # Обрабатываем события
             if e.type == QUIT:
                 raise SystemExit, "QUIT"
+
+            if read_commands(cmd_file) == 0:
+                up = True
+                down = False
+                left = False
+                right = False
+            if read_commands(cmd_file) == 1:
+                up = False
+                down = True
+                left = False
+                right = False
+            if read_commands(cmd_file) == 2:
+                up = False
+                down = False
+                left = False
+                right = True
+
+            if read_commands(cmd_file) == 3:
+                up = False
+                down = False
+                left = True
+                right = False
+
 
             if e.type == KEYDOWN and e.key == K_LEFT:
                 left = True
