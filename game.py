@@ -6,7 +6,7 @@ import pygame
 
 from pygame import *
 from blocks import *
-from player import *
+from robot import *
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
@@ -31,13 +31,13 @@ def main():
     cmd_file = '/home/vanik/darwin/speach-detector/speech-client/stat/cmd'
     pygame.init() # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode(DISPLAY) # Создаем окошко
-    pygame.display.set_caption("Super Mario Boy") # Пишем в шапку
+    pygame.display.set_caption("Robot field") # Пишем в шапку
     bg = Surface((WIN_WIDTH, WIN_HEIGHT)) # Создание видимой поверхности
                                           # будем использовать как фон
     bg.fill(Color(BACKGROUND_COLOR))      # Заливаем поверхность сплошным цветом
 
     timer = pygame.time.Clock()
-    hero = Player(55, 55)
+    hero = Robot(55, 55)
     left = False
     right = False
     up = False

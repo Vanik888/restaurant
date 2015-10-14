@@ -9,7 +9,7 @@ HEIGHT = 32
 COLOR =  "#888888"
 
 
-class Player(sprite.Sprite):
+class Robot(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.xvel = 0   #скорость перемещения. 0 - стоять на месте
