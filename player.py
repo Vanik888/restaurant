@@ -17,7 +17,8 @@ class Player(sprite.Sprite):
         self.startX = x # Начальная позиция Х, пригодится когда будем переигрывать уровень
         self.startY = y
         self.image = Surface((WIDTH, HEIGHT))
-        self.image.fill(Color(COLOR))
+        # self.image.fill(Color(COLOR))
+        self.image = image.load("static/Robot-icon_22_22.png")
         self.rect = Rect(x, y, WIDTH, HEIGHT) # прямоугольный объект
 
     def update(self,  left, right, up, down, platforms):

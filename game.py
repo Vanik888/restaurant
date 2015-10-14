@@ -16,13 +16,15 @@ BACKGROUND_COLOR = "#004000"
 
 def read_commands(commands_abs_path):
     with open(commands_abs_path, 'r') as f:
-        # if os.stat(f).st_size == 0:
-        #     return None
-        # else:
-        smbl = int(f.readline())
+        if os.stat(commands_abs_path).st_size != 0:
+            smbl = int(f.readline())
+        else: smbl = -1
         return smbl
-            # return f.readline()
 
+
+def clean_commands_file(commands_abs_path):
+    with open(commands_abs_path, 'w+'):
+        pass
 
 
 def main():
@@ -98,12 +100,16 @@ def main():
 
             if e.type == KEYDOWN and e.key == K_LEFT:
                 left = True
+                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_RIGHT:
                 right = True
+                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_UP:
                 up = True
+                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_DOWN:
                 down = True
+                clean_commands_file(cmd_file)
 
             if e.type == KEYUP and e.key == K_RIGHT:
                 right = False
