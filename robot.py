@@ -3,10 +3,11 @@
 
 from pygame import *
 
-MOVE_SPEED = 7
-WIDTH = 22
-HEIGHT = 32
-COLOR =  "#888888"
+CELL_SIZE = 32
+MOVE_SPEED = CELL_SIZE
+WIDTH = CELL_SIZE
+HEIGHT = CELL_SIZE
+COLOR = "#888888"
 
 
 class Robot(sprite.Sprite):
@@ -20,6 +21,17 @@ class Robot(sprite.Sprite):
         # self.image.fill(Color(COLOR))
         self.image = image.load("static/Robot-icon_22_22.png")
         self.rect = Rect(x, y, WIDTH, HEIGHT) # прямоугольный объект
+        self.path = None
+
+    def set_path(self, path):
+        self.path = path
+
+    def move(self):
+        if len(self.path) > 0:
+            next_cell = self.path.pop(0)
+            self.rect.x = next_cell.x * CELL_SIZE
+            self.rect.y = next_cell.y * CELL_SIZE
+
 
     def update(self,  left, right, up, down, platforms):
         if left:

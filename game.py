@@ -4,31 +4,38 @@
 import os
 import pygame
 
+from itertools import product
 from pygame import *
 from blocks import *
 from robot import *
+from astar.astar_grid import *
 
-WIN_WIDTH = 800
-WIN_HEIGHT = 640
+
+CELL_SIZE = 32
+CART_WIDTH = 25
+CART_HEIGHT = 20
+WIN_WIDTH = CART_WIDTH * CELL_SIZE
+WIN_HEIGHT = CART_HEIGHT * CELL_SIZE
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004000"
 
 
-def read_commands(commands_abs_path):
-    with open(commands_abs_path, 'r') as f:
-        if os.stat(commands_abs_path).st_size != 0:
-            smbl = int(f.readline())
-        else: smbl = -1
-        return smbl
-
-
-def clean_commands_file(commands_abs_path):
-    with open(commands_abs_path, 'w+'):
-        pass
+def make_graph(width, height):
+    nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
+    graph = {}
+    for x, y in product(range(width), range(height)):
+        node = nodes[x][y]
+        graph[node] = []
+        for i, j in product([-1, 0, 1], [-1, 0, 1]):
+            if not (0 <= x + i < width):
+                continue
+            if not (0 <= y + j < height):
+                continue
+            graph[nodes[x][y]].append(nodes[x+i][y+j])
+    return graph, nodes
 
 
 def main():
-    cmd_file = '/home/vanik/darwin/speach-detector/speech-client/stat/cmd'
     pygame.init() # Инициация PyGame, обязательная строчка
     screen = pygame.display.set_mode(DISPLAY) # Создаем окошко
     pygame.display.set_caption("Robot field") # Пишем в шапку
@@ -37,11 +44,18 @@ def main():
     bg.fill(Color(BACKGROUND_COLOR))      # Заливаем поверхность сплошным цветом
 
     timer = pygame.time.Clock()
-    hero = Robot(55, 55)
+    hero = Robot(CELL_SIZE*1, CELL_SIZE*1)
     left = False
     right = False
     up = False
     down = False
+
+    graph, nodes = make_graph(CART_HEIGHT, CART_WIDTH)
+    paths = AStarGrid(graph)
+    start, end = nodes[2][2], nodes[4][4]
+    path = paths.search(start, end)
+    hero.set_path(path)
+
 
     entities = pygame.sprite.Group() # Все объекты
     platforms = [] # то, во что мы будем врезаться или опираться
@@ -75,41 +89,14 @@ def main():
             if e.type == QUIT:
                 raise SystemExit, "QUIT"
 
-            if read_commands(cmd_file) == 0:
-                up = True
-                down = False
-                left = False
-                right = False
-            if read_commands(cmd_file) == 1:
-                up = False
-                down = True
-                left = False
-                right = False
-            if read_commands(cmd_file) == 2:
-                up = False
-                down = False
-                left = False
-                right = True
-
-            if read_commands(cmd_file) == 3:
-                up = False
-                down = False
-                left = True
-                right = False
-
-
             if e.type == KEYDOWN and e.key == K_LEFT:
                 left = True
-                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_RIGHT:
                 right = True
-                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_UP:
                 up = True
-                clean_commands_file(cmd_file)
             if e.type == KEYDOWN and e.key == K_DOWN:
                 down = True
-                clean_commands_file(cmd_file)
 
             if e.type == KEYUP and e.key == K_RIGHT:
                 right = False
@@ -123,6 +110,7 @@ def main():
         screen.blit(bg, (0, 0))      # Каждую итерацию необходимо всё перерисовывать
         x = 0
         y = 0
+
         for row in level:
             for col in row:
                 if col == "-":
@@ -133,7 +121,8 @@ def main():
             y += PLATFORM_HEIGHT
             x = 0
 
-        hero.update(left, right, up, down, platforms) # передвижение
+        # hero.update(left, right, up, down, platforms) # передвижение
+        hero.move()
         entities.draw(screen)
 
         pygame.display.update()     # обновление и вывод всех изменений на экран
