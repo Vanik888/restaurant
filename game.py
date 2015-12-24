@@ -106,51 +106,72 @@ def main():
 
     START_CELL_X = 1
     START_CELL_Y = 1
-    hero = Robot(START_CELL_X, START_CELL_Y, paths, nodes)
     table = Table(20, 5, CELL_SIZE)
-    entities.add(table)
-    entities.add(hero)
+    tables = [table]
+
+    robot = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robots = [robot]
+
+    tables_queue = []
+    for table in tables:
+        entities.add(table)
+    for robot in robots:
+        entities.add(robot)
 
 
 
-    hero.set_path(table.get_stay_point()[0],table.get_stay_point()[1])
-    # start, end = nodes[START_CELL_X][START_CELL_Y], nodes[18][6]
+    # robot.set_path(table.get_stay_point()[0],table.get_stay_point()[1])
+    # graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
+    # paths = AStarGrid(graph)
+    # start, end = nodes[2][2], nodes[1][1]
     # path = paths.search(start, end)
+
+    # paths = AStarGrid(graph)
+    # graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
+    # paths = AStarGrid(graph)
+    # start, end = nodes[1][1], nodes[2][2]
+    # path = paths.search(start, end)
+
     # hero.set_path(path)
 
     while 1: # Основной цикл программы
         timer.tick(2000)
-        for e in pygame.event.get(): # Обрабатываем события
-            if e.type == QUIT:
-                raise SystemExit, "QUIT"
-
-            if e.type == KEYDOWN and e.key == K_LEFT:
-                left = True
-            if e.type == KEYDOWN and e.key == K_RIGHT:
-                right = True
-            if e.type == KEYDOWN and e.key == K_UP:
-                up = True
-            if e.type == KEYDOWN and e.key == K_DOWN:
-                down = True
-
-            if e.type == KEYUP and e.key == K_RIGHT:
-                right = False
-            if e.type == KEYUP and e.key == K_LEFT:
-                left = False
-            if e.type == KEYUP and e.key == K_UP:
-                up = False
-            if e.type == KEYUP and e.key == K_DOWN:
-                down = False
-
         screen.blit(bg, (0, 0))      # Каждую итерацию необходимо всё перерисовывать
 
         for b in barriers:
             pf = Platform(b[0]*CELL_SIZE, b[1]*CELL_SIZE)
             entities.add(pf)
 
-        # hero.update(left, right, up, down, platforms) # передвижение
+        for robot in robots:
+            # client is processed
+            if robot.on_client():
+                robot.get_next_task(tables_queue)
+                for table in tables:
+                    if robot.get_current_pos() == table.get_stay_point():
+                        table.set_not_ready()
+                        table.set_time_count(10)
+            # moved on base
+            if robot.on_base() :
+                robot.get_next_task(tables_queue)
+                robot.client_count = 0
 
-        hero.make_step()
+            if not robot.on_client() and not robot.on_base():
+                if robot.dest_description == ON_BASE and len(tables_queue) > 0:
+                    robot.get_next_task(tables_queue)
+                if robot.dest_description == ON_CLIENT:
+                    pass
+
+            robot.make_step()
+
+        # add client
+        for table in tables:
+            table.dec_time_count()
+            if table.status == NOT_READY_STATUS and table not in tables_queue:
+                if table.time_count <= 0:
+                    table.set_ready()
+                    tables_queue.append(table)
+
+
         entities.draw(screen)
 
         pygame.display.update()     # обновление и вывод всех изменений на экран
