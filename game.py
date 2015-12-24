@@ -9,6 +9,7 @@ from itertools import product
 from pygame import *
 from blocks import *
 from robot import *
+from table import *
 from astar.astar_grid import *
 
 
@@ -100,16 +101,22 @@ def main():
            "-------------------------"]
 
     barriers = get_static_barriers(level)
-    START_CELL_X = 1
-    START_CELL_Y = 1
-    hero = Robot(CELL_SIZE*START_CELL_X, CELL_SIZE*START_CELL_Y)
-    entities.add(hero)
-
     graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
     paths = AStarGrid(graph)
-    start, end = nodes[START_CELL_X][START_CELL_Y], nodes[1][15]
-    path = paths.search(start, end)
-    hero.set_path(path)
+
+    START_CELL_X = 1
+    START_CELL_Y = 1
+    hero = Robot(START_CELL_X, START_CELL_Y, paths, nodes)
+    table = Table(20, 5, CELL_SIZE)
+    entities.add(table)
+    entities.add(hero)
+
+
+
+    hero.set_path(table.get_stay_point()[0],table.get_stay_point()[1])
+    # start, end = nodes[START_CELL_X][START_CELL_Y], nodes[18][6]
+    # path = paths.search(start, end)
+    # hero.set_path(path)
 
     while 1: # Основной цикл программы
         timer.tick(2000)
@@ -142,7 +149,8 @@ def main():
             entities.add(pf)
 
         # hero.update(left, right, up, down, platforms) # передвижение
-        hero.move()
+
+        hero.make_step()
         entities.draw(screen)
 
         pygame.display.update()     # обновление и вывод всех изменений на экран
