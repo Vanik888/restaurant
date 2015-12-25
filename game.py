@@ -106,8 +106,9 @@ def main():
 
     START_CELL_X = 1
     START_CELL_Y = 1
-    table = Table(20, 5, CELL_SIZE)
-    tables = [table]
+    table1 = Table(7, 5, CELL_SIZE)
+    table2 = Table(7, 7, CELL_SIZE)
+    tables = [table1, table2]
 
     robot = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
     robots = [robot]
@@ -143,25 +144,63 @@ def main():
             entities.add(pf)
 
         for robot in robots:
-            # client is processed
-            if robot.on_client():
-                robot.get_next_task(tables_queue)
+            # init pos/ came to base
+            if robot.on_base() and robot.dest_description == ON_BASE:
+                robot.client_count = 0
+                if len(tables_queue) > 0:
+                    robot.get_next_client(tables_queue.pop(0))
+                    robot.client_count += 1
+                else:
+                    robot.set_path_to_base()
+            # moving from base
+            elif robot.on_base() and robot.dest_description == ON_CLIENT:
+                pass
+            # moving from client
+            elif robot.on_client() and robot.dest_description == ON_BASE:
+                if len(tables_queue) > 0 and robot.client_count <= 2:
+                    robot.get_next_client(tables_queue.pop(0))
+                    robot.client_count += 1
+            # came to client
+            elif robot.on_client() and robot.dest_description == ON_CLIENT:
+                robot.set_path_to_base()
                 for table in tables:
                     if robot.get_current_pos() == table.get_stay_point():
                         table.set_not_ready()
                         table.set_time_count(10)
-            # moved on base
-            if robot.on_base() :
-                robot.get_next_task(tables_queue)
-                robot.client_count = 0
 
-            if not robot.on_client() and not robot.on_base():
-                if robot.dest_description == ON_BASE and len(tables_queue) > 0:
-                    robot.get_next_task(tables_queue)
-                if robot.dest_description == ON_CLIENT:
-                    pass
+            # moving to base
+            elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_BASE:
+                if len(tables_queue) > 0 and robot.client_count < 2:
+                    robot.get_next_client(tables_queue.pop(0))
+                    robot.client_count += 1
+            # moving to client
+            elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
+                pass #still move to client
+
+
 
             robot.make_step()
+
+            # # client is processed
+            # if robot.on_client():
+            #     robot.get_next_task(tables_queue)
+            #     for table in tables:
+            #         if robot.get_current_pos() == table.get_stay_point():
+            #             table.set_not_ready()
+            #             table.set_time_count(10)
+            #
+            # # achieved base
+            # if robot.on_base() and robot.dest_description == ON_BASE:
+            #     robot.get_next_task(tables_queue)
+            #     robot.client_count = 0
+            #
+            # if not robot.on_client() and not robot.on_base():
+            #     if robot.dest_description == ON_BASE and len(tables_queue) > 0:
+            #         robot.get_next_task(tables_queue)
+            #     if robot.dest_description == ON_CLIENT:
+            #         pass
+            #
+            # robot.make_step()
 
         # add client
         for table in tables:

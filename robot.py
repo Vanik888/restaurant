@@ -24,6 +24,7 @@ class Robot(sprite.Sprite):
         self.cell_current_x = cell_start_x
         self.cell_current_y = cell_start_y
         self.client_count = 0
+        self.dest_description = ON_BASE
         self.tables = tables
         self.cart_field_width = cart_field_width
         self.cart_field_height = cart_field_height
@@ -85,19 +86,15 @@ class Robot(sprite.Sprite):
             self.cell_current_x = next_cell.x
             self.cell_current_y = next_cell.y
 
-    def get_next_task(self, tables_queue):
-            if self.client_count <= 2 and len(tables_queue) > 0:
-                self.client_count += 1
-                destination = tables_queue.pop(0).get_stay_point()
-                self.set_path(*destination)
-                self.dest_description = ON_CLIENT
-            else:
-                destination = (self.cell_start_x, self.cell_start_y)
-                self.set_path(*destination)
-                self.dest_description = ON_BASE
+    def set_path_to_base(self):
+        destination = (self.cell_start_x, self.cell_start_y)
+        self.set_path(*destination)
+        self.dest_description = ON_BASE
 
-
-
+    def get_next_client(self, client):
+        destination = client.get_stay_point()
+        self.set_path(*destination)
+        self.dest_description = ON_CLIENT
 
 
     def update(self,  left, right, up, down, platforms):
