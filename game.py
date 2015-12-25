@@ -11,6 +11,7 @@ from blocks import *
 from robot import *
 from table import *
 from astar.astar_grid import *
+from time import sleep
 
 
 CELL_SIZE = 32
@@ -83,19 +84,19 @@ def main():
            "-                       -",
            "-                       -",
            "-                       -",
-           "-            --         -",
-           "-                       -",
-           "--                      -",
-           "-                       -",
-           "-                   --- -",
            "-                       -",
            "-                       -",
-           "-      ---              -",
            "-                       -",
-           "-   -----------         -",
            "-                       -",
-           "-                -      -",
-           "-                   --  -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
+           "-                       -",
            "-                       -",
            "-                       -",
            "-------------------------"]
@@ -106,14 +107,25 @@ def main():
 
     START_CELL_X = 1
     START_CELL_Y = 1
-    table1 = Table(7, 5, CELL_SIZE)
-    table2 = Table(7, 7, CELL_SIZE)
-    tables = [table1, table2]
+    table1 = Table(5, 5, CELL_SIZE)
+    table2 = Table(5, 8, CELL_SIZE)
+    table3 = Table(5, 11, CELL_SIZE)
+    table4 = Table(10, 5, CELL_SIZE)
+    table5 = Table(10, 8, CELL_SIZE)
+    table6 = Table(10, 11, CELL_SIZE)
+    table7 = Table(15, 5, CELL_SIZE)
+    table8 = Table(15, 8, CELL_SIZE)
+    table9 = Table(15, 11, CELL_SIZE)
+    tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
+
 
     robot1 = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
     robot2 = Robot(START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot3 = Robot(START_CELL_X, START_CELL_Y+7, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robots = [robot1, robot2, robot3]
+    robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot5 = Robot(START_CELL_X, START_CELL_Y+12, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot6 = Robot(START_CELL_X, START_CELL_Y+15, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robots = [robot1, robot2, robot3, robot4, robot5, robot6]
 
     tables_queue = []
     for table in tables:
@@ -122,29 +134,17 @@ def main():
         entities.add(robot)
 
 
-
-    # robot.set_path(table.get_stay_point()[0],table.get_stay_point()[1])
-    # graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
-    # paths = AStarGrid(graph)
-    # start, end = nodes[2][2], nodes[1][1]
-    # path = paths.search(start, end)
-
-    # paths = AStarGrid(graph)
-    # graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
-    # paths = AStarGrid(graph)
-    # start, end = nodes[1][1], nodes[2][2]
-    # path = paths.search(start, end)
-
-    # hero.set_path(path)
-
     while 1: # Основной цикл программы
-        timer.tick(2000)
+        timer.tick(20)
+        sleep(1)
         screen.blit(bg, (0, 0))      # Каждую итерацию необходимо всё перерисовывать
 
         for b in barriers:
             pf = Platform(b[0]*CELL_SIZE, b[1]*CELL_SIZE)
             entities.add(pf)
 
+
+        robots.reverse()
         for robot in robots:
             # init pos/ came to base
             if robot.on_base() and robot.dest_description == ON_BASE:
@@ -152,6 +152,7 @@ def main():
                 if len(tables_queue) > 0:
                     robot.get_next_client(tables_queue.pop(0))
                     robot.client_count += 1
+                    robot.total_served_client_count += 1
                 else:
                     robot.set_path_to_base()
             # moving from base
@@ -162,6 +163,7 @@ def main():
                 if len(tables_queue) > 0 and robot.client_count <= 2:
                     robot.get_next_client(tables_queue.pop(0))
                     robot.client_count += 1
+                    robot.total_served_client_count += 1
             # came to client
             elif robot.on_client() and robot.dest_description == ON_CLIENT:
                 robot.set_path_to_base()
@@ -175,15 +177,12 @@ def main():
                 if len(tables_queue) > 0 and robot.client_count < 2:
                     robot.get_next_client(tables_queue.pop(0))
                     robot.client_count += 1
+                    robot.total_served_client_count += 1
             # moving to client
             elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
                 pass #still move to client
 
-
-
             robot.make_step()
-
-
 
         # add client
         for table in tables:

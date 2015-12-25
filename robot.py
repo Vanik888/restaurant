@@ -24,12 +24,12 @@ class Robot(sprite.Sprite):
         self.cell_current_x = cell_start_x
         self.cell_current_y = cell_start_y
         self.client_count = 0
+        self.total_served_client_count = 0
         self.dest_description = ON_BASE
         self.tables = tables
         self.cart_field_width = cart_field_width
         self.cart_field_height = cart_field_height
         self.barriers = barriers
-
 
         self.xvel = 0   #скорость перемещения. 0 - стоять на месте
         self.yvel = 0 # скорость вертикального перемещения
@@ -39,11 +39,18 @@ class Robot(sprite.Sprite):
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
 
+    def get_tables_area(self):
+        tables_area = []
+        for t in self.tables:
+            tables_area += t.get_table_area()
+        return tables_area
+
     def make_graph(self, width, height, barriers):
+        tables_area = self.get_tables_area()
         nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
         graph = {}
         for x, y in product(range(width), range(height)):
-            if (x, y) not in barriers:
+            if (x, y) not in barriers + tables_area:
                 node = nodes[x][y]
                 graph[node] = []
                 for i, j in product([-1, 0, 1], [-1, 0, 1]):
@@ -51,7 +58,7 @@ class Robot(sprite.Sprite):
                         continue
                     if not (0 <= y + j < height):
                         continue
-                    if not (x+i,y+j) in barriers:
+                    if not (x+i,y+j) in barriers + tables_area:
                         graph[nodes[x][y]].append(nodes[x+i][y+j])
         return graph, nodes
 
@@ -65,12 +72,7 @@ class Robot(sprite.Sprite):
         self.path.pop(0)
 
     def on_client(self):
-        on_client = False
-        for table in self.tables:
-            if (self.cell_current_x, self.cell_current_y) == table.get_stay_point():
-                on_client = True
-                break
-        return on_client
+        return (self.cell_current_x, self.cell_current_y) == self.client_destination
 
     def on_base(self):
         return (self.cell_current_x, self.cell_current_y) == (self.cell_start_x, self.cell_start_y)
@@ -93,6 +95,7 @@ class Robot(sprite.Sprite):
 
     def get_next_client(self, client):
         destination = client.get_stay_point()
+        self.client_destination = destination
         self.set_path(*destination)
         self.dest_description = ON_CLIENT
 

@@ -24,6 +24,13 @@ class Table(sprite.Sprite):
         # coordinates of self.image
         self.rect = Rect(cell_x*CELL_SIZE, cell_y*CELL_SIZE, CELL_SIZE*2, CELL_SIZE*2)
 
+    def get_table_area(self):
+        table_area = []
+        for x in range(2):
+            for y in range(2):
+                table_area.append((self.cell_x + x, self.cell_y + y))
+        return table_area
+
     def get_stay_point(self):
         return self.cell_x-1, self.cell_y+1
 
