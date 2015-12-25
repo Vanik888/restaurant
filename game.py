@@ -110,8 +110,10 @@ def main():
     table2 = Table(7, 7, CELL_SIZE)
     tables = [table1, table2]
 
-    robot = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robots = [robot]
+    robot1 = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot2 = Robot(START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot3 = Robot(START_CELL_X, START_CELL_Y+7, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robots = [robot1, robot2, robot3]
 
     tables_queue = []
     for table in tables:
@@ -181,26 +183,7 @@ def main():
 
             robot.make_step()
 
-            # # client is processed
-            # if robot.on_client():
-            #     robot.get_next_task(tables_queue)
-            #     for table in tables:
-            #         if robot.get_current_pos() == table.get_stay_point():
-            #             table.set_not_ready()
-            #             table.set_time_count(10)
-            #
-            # # achieved base
-            # if robot.on_base() and robot.dest_description == ON_BASE:
-            #     robot.get_next_task(tables_queue)
-            #     robot.client_count = 0
-            #
-            # if not robot.on_client() and not robot.on_base():
-            #     if robot.dest_description == ON_BASE and len(tables_queue) > 0:
-            #         robot.get_next_task(tables_queue)
-            #     if robot.dest_description == ON_CLIENT:
-            #         pass
-            #
-            # robot.make_step()
+
 
         # add client
         for table in tables:
