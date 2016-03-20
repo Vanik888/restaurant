@@ -23,22 +23,20 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 BACKGROUND_COLOR = "#004000"
 
 
-def make_graph(width, height, barriers):
-    nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
-    graph = {}
-    for x, y in product(range(width), range(height)):
-        if (x, y) not in barriers:
-            node = nodes[x][y]
-            graph[node] = []
-            for i, j in product([-1, 0, 1], [-1, 0, 1]):
-                if not (0 <= x + i < width):
-                    continue
-                if not (0 <= y + j < height):
-                    continue
-                if not (x+i,y+j) in barriers:
-                    graph[nodes[x][y]].append(nodes[x+i][y+j])
-    return graph, nodes
+class ObstaclesDefiner():
+    def __init__(self, robots, peoples):
+        self.robots = robots
+        self.peoples = peoples
 
+    def no_object(self, x, y, objects):
+        no_object = True
+        for o in objects:
+            if (x, y) == (o.cell_current_x, o.cell_current_y):
+                no_object = False
+        return no_object
+
+    def is_clear(self, x, y):
+        return self.no_object(x, y, self.robots) and self.no_object(x, y, self.peoples)
 
 def get_static_barriers(level):
     x = 0
@@ -102,8 +100,6 @@ def main():
            "-------------------------"]
 
     barriers = get_static_barriers(level)
-    graph, nodes = make_graph(CART_WIDTH, CART_HEIGHT, barriers)
-    paths = AStarGrid(graph)
 
     START_CELL_X = 1
     START_CELL_Y = 1
@@ -126,6 +122,7 @@ def main():
     robot5 = Robot(START_CELL_X, START_CELL_Y+12, tables, CART_WIDTH, CART_HEIGHT, barriers)
     robot6 = Robot(START_CELL_X, START_CELL_Y+15, tables, CART_WIDTH, CART_HEIGHT, barriers)
     robots = [robot1, robot2, robot3, robot4, robot5, robot6]
+    OD = ObstaclesDefiner(robots=robots, peoples=[])
 
     tables_queue = []
     for table in tables:
@@ -182,7 +179,7 @@ def main():
             elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
                 pass #still move to client
 
-            robot.make_step()
+            robot.make_step(OD)
 
         # add client
         for table in tables:

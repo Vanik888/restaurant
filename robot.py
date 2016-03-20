@@ -80,13 +80,14 @@ class Robot(sprite.Sprite):
     def get_current_pos(self):
         return self.cell_current_x, self.cell_current_y
 
-    def make_step(self):
+    def make_step(self, od):
         if len(self.path) > 0:
             next_cell = self.path.pop(0)
-            self.rect.x = next_cell.x * CELL_SIZE
-            self.rect.y = next_cell.y * CELL_SIZE
-            self.cell_current_x = next_cell.x
-            self.cell_current_y = next_cell.y
+            if (od.is_clear(next_cell.x, next_cell.y)):
+                self.rect.x = next_cell.x * CELL_SIZE
+                self.rect.y = next_cell.y * CELL_SIZE
+                self.cell_current_x = next_cell.x
+                self.cell_current_y = next_cell.y
 
     def set_path_to_base(self):
         destination = (self.cell_start_x, self.cell_start_y)
