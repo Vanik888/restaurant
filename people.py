@@ -13,8 +13,8 @@ WIDTH = CELL_SIZE
 HEIGHT = CELL_SIZE
 ON_CLIENT = 'on_client'
 ON_BASE = 'on_base'
+ON_TABLE = 'on_table'
 COLOR = "#888888"
-
 
 class People(sprite.Sprite):
     def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers):
@@ -37,6 +37,8 @@ class People(sprite.Sprite):
         self.image = image.load("static/girl_22_22.png")
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
+        self.current_task = None
+        self.tasks = [self.move_to_table, self.get_free_table, ]
 
     def get_tables_area(self):
         tables_area = []
@@ -44,12 +46,12 @@ class People(sprite.Sprite):
             tables_area += t.get_table_area()
         return tables_area
 
-    def make_graph(self, width, height, barriers):
+    def make_graph(self, width, height, barriers, dyn_obstacles=[]):
         tables_area = self.get_tables_area()
         nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
         graph = {}
         for x, y in product(range(width), range(height)):
-            if (x, y) not in barriers + tables_area:
+            if (x, y) not in barriers + tables_area + dyn_obstacles:
                 node = nodes[x][y]
                 graph[node] = []
                 for i, j in product([-1, 0, 1], [-1, 0, 1]):
@@ -57,12 +59,12 @@ class People(sprite.Sprite):
                         continue
                     if not (0 <= y + j < height):
                         continue
-                    if not (x+i,y+j) in barriers + tables_area:
+                    if not (x+i,y+j) in barriers + tables_area + dyn_obstacles:
                         graph[nodes[x][y]].append(nodes[x+i][y+j])
         return graph, nodes
 
-    def set_path(self, cell_end_x, cell_end_y):
-        graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers)
+    def set_path(self, cell_end_x, cell_end_y, dyn_obstacles=[]):
+        graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers, dyn_obstacles)
         paths = AStarGrid(graph)
         self.path = paths.search(
             nodes[self.cell_current_x][self.cell_current_y],
@@ -87,12 +89,22 @@ class People(sprite.Sprite):
                 self.rect.y = next_cell.y * CELL_SIZE
                 self.cell_current_x = next_cell.x
                 self.cell_current_y = next_cell.y
-            elif not od.no_robots(next_cell.x, next_cell.y):
-                self.path.append(next_cell)
-                print('there are robot')
-            elif not od.no_peoples(next_cell.x, next_cell.y):
-                self.path.append(next_cell)
-                print('there are people')
+            # не последний шаг и есть препятствия => перестраиваем маршрут
+            elif len(self.path) != 0:
+                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
+                if not od.no_robots(next_cell.x, next_cell.y):
+                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    self.update_path(next_cell.x, next_cell.y)
+                elif not od.no_peoples(next_cell.x, next_cell.y):
+                    self.update_path(next_cell.x, next_cell.y)
+                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+            else:
+                if not od.no_robots(next_cell.x, next_cell.y):
+                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    print('skip the step')
+                elif not od.no_peoples(next_cell.x, next_cell.y):
+                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    print('skip the step')
 
     def set_path_to_base(self):
         destination = (self.cell_start_x, self.cell_start_y)
@@ -104,6 +116,41 @@ class People(sprite.Sprite):
         self.client_destination = destination
         self.set_path(*destination)
         self.dest_description = ON_CLIENT
+
+    # заняли столик
+    def get_free_table(self, *args, **kwargs):
+        tables = kwargs['tables']
+        busy_tables = kwargs['busy_tables']
+        for t in tables:
+            if t not in busy_tables:
+                busy_tables.append(t)
+                self.table = t
+                return
+        print('all tables are busy')
+        self.tasks.append(self.get_free_table)
+
+    # засетили путь до стола
+    def set_path_to_table(self):
+        destination = self.table.get_sit_point()
+        self.set_path(*destination)
+        self.dest_description = ON_TABLE
+
+    # шагаем до стола
+    def move_to_table(self, *args, **kwargs):
+        if not self.path:
+            self.set_path_to_table()
+        OD = kwargs['OD']
+        self.make_step(OD)
+        self.tasks.append(self.move_to_table)
+
+    def execute(self, *args, **kwargs):
+        if len(self.tasks) > 0:
+            self.current_task = self.tasks.pop()
+            self.current_task(*args, **kwargs)
+        else:
+            print('wait')
+
+
 
 
 

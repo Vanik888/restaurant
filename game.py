@@ -120,9 +120,10 @@ def main():
     table8 = Table(15, 8, CELL_SIZE)
     table9 = Table(15, 11, CELL_SIZE)
     tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
+    busy_tables = []
 
 
-    people_julia = People('Julia', 3, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    people_julia = People('Julia', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     peoples = [people_julia]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -202,6 +203,8 @@ def main():
             robot.make_step(OD)
             entities.draw(screen)
             pygame.display.update()
+        for p in peoples:
+            people.execute(OD=OD, tables=tables, busy_tables=busy_tables)
 
 
         # add client
