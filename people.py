@@ -16,7 +16,7 @@ ON_BASE = 'on_base'
 COLOR = "#888888"
 
 
-class Robot(sprite.Sprite):
+class People(sprite.Sprite):
     def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers):
         sprite.Sprite.__init__(self)
         self.name = name
@@ -24,8 +24,6 @@ class Robot(sprite.Sprite):
         self.cell_start_y = cell_start_y
         self.cell_current_x = cell_start_x
         self.cell_current_y = cell_start_y
-        self.client_count = 0
-        self.total_served_client_count = 0
         self.dest_description = ON_BASE
         self.tables = tables
         self.cart_field_width = cart_field_width
@@ -36,7 +34,7 @@ class Robot(sprite.Sprite):
         self.yvel = 0 # скорость вертикального перемещения
 
         self.image = Surface((WIDTH, HEIGHT))
-        self.image = image.load("static/Robot-icon_22_22.png")
+        self.image = image.load("static/girl_22_22.png")
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
 
@@ -46,12 +44,12 @@ class Robot(sprite.Sprite):
             tables_area += t.get_table_area()
         return tables_area
 
-    def make_graph(self, width, height, barriers, peoples=[]):
+    def make_graph(self, width, height, barriers):
         tables_area = self.get_tables_area()
         nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
         graph = {}
         for x, y in product(range(width), range(height)):
-            if (x, y) not in barriers + tables_area + peoples:
+            if (x, y) not in barriers + tables_area:
                 node = nodes[x][y]
                 graph[node] = []
                 for i, j in product([-1, 0, 1], [-1, 0, 1]):
@@ -59,12 +57,12 @@ class Robot(sprite.Sprite):
                         continue
                     if not (0 <= y + j < height):
                         continue
-                    if not (x+i,y+j) in barriers + tables_area + peoples:
+                    if not (x+i,y+j) in barriers + tables_area:
                         graph[nodes[x][y]].append(nodes[x+i][y+j])
         return graph, nodes
 
-    def set_path(self, cell_end_x, cell_end_y, peoples=[]):
-        graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers, peoples)
+    def set_path(self, cell_end_x, cell_end_y):
+        graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers)
         paths = AStarGrid(graph)
         self.path = paths.search(
             nodes[self.cell_current_x][self.cell_current_y],
@@ -91,19 +89,10 @@ class Robot(sprite.Sprite):
                 self.cell_current_y = next_cell.y
             elif not od.no_robots(next_cell.x, next_cell.y):
                 self.path.append(next_cell)
-                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
-                print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                print('there are robot')
             elif not od.no_peoples(next_cell.x, next_cell.y):
-                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
-                print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
                 self.path.append(next_cell)
-                for p in self.path:
-                    print p.get_cart_coordinates()
-                destination = self.path[0].get_cart_coordinates()
-                self.set_path(*destination, peoples=[(next_cell.x, next_cell.y)])
-                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
-                print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-
+                print('there are people')
 
     def set_path_to_base(self):
         destination = (self.cell_start_x, self.cell_start_y)
@@ -116,42 +105,5 @@ class Robot(sprite.Sprite):
         self.set_path(*destination)
         self.dest_description = ON_CLIENT
 
-
-    def update(self,  left, right, up, down, platforms):
-        if left:
-            self.xvel = -MOVE_SPEED # Лево = x- n
-
-        if right:
-            self.xvel = MOVE_SPEED # Право = x + n
-
-        if up:
-            self.yvel = -MOVE_SPEED
-
-        if down:
-            self.yvel = MOVE_SPEED
-
-        if not(up or down):
-            self.yvel = 0
-
-        if not(left or right): # стоим, когда нет указаний идти
-            self.xvel = 0
-
-        self.rect.x += self.xvel # переносим свои положение на xvel
-        self.collide(self.xvel, 0, platforms)
-
-        self.rect.y += self.yvel
-        self.collide(0, self.yvel, platforms)
-
-    def collide(self, xvel, yvel, platforms):
-        for p in platforms:
-            if sprite.collide_rect(self, p):
-                if xvel > 0: # движение вправо
-                    self.rect.right = p.rect.left
-                if xvel < 0: # движение влево
-                    self.rect.left = p.rect.right
-                if yvel > 0: # движение вниз
-                    self.rect.bottom = p.rect.top
-                if yvel < 0: # движение вверх
-                    self.rect.top = p.rect.bottom
 
 

@@ -9,6 +9,7 @@ from itertools import product
 from pygame import *
 from blocks import *
 from robot import *
+from people import *
 from table import *
 from astar.astar_grid import *
 from time import sleep
@@ -34,6 +35,12 @@ class ObstaclesDefiner():
             if (x, y) == (o.cell_current_x, o.cell_current_y):
                 no_object = False
         return no_object
+
+    def no_robots(self, x, y):
+        return self.no_object(x, y, self.robots)
+
+    def no_peoples(self, x, y):
+        return self.no_object(x, y, self.peoples)
 
     def is_clear(self, x, y):
         return self.no_object(x, y, self.robots) and self.no_object(x, y, self.peoples)
@@ -115,20 +122,30 @@ def main():
     tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
 
 
-    robot1 = Robot(START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot2 = Robot(START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot5 = Robot(START_CELL_X, START_CELL_Y+12, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot6 = Robot(START_CELL_X, START_CELL_Y+15, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robots = [robot1, robot2, robot3, robot4, robot5, robot6]
-    OD = ObstaclesDefiner(robots=robots, peoples=[])
+    people_julia = People('Julia', 3, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    peoples = [people_julia]
+
+    robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robot5 = Robot(START_CELL_X, START_CELL_Y+12, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robot6 = Robot(START_CELL_X, START_CELL_Y+15, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robots = [robot1, robot2, robot3, robot4, robot5, robot6]
+    ##to_remove
+    robot1.set_path(4,6)
+    robot2.set_path(2,3)
+    robots = [robot1, robot2]
+    OD = ObstaclesDefiner(robots=robots, peoples=[people_julia])
 
     tables_queue = []
     for table in tables:
         entities.add(table)
     for robot in robots:
         entities.add(robot)
+    for people in peoples:
+        entities.add(people)
+
 
 
     while 1: # Основной цикл программы
@@ -143,56 +160,65 @@ def main():
 
         robots.reverse()
         for robot in robots:
-            # init pos/ came to base
-            if robot.on_base() and robot.dest_description == ON_BASE:
-                robot.client_count = 0
-                if len(tables_queue) > 0:
-                    robot.get_next_client(tables_queue.pop(0))
-                    robot.client_count += 1
-                    robot.total_served_client_count += 1
-                else:
-                    robot.set_path_to_base()
-            # moving from base
-            elif robot.on_base() and robot.dest_description == ON_CLIENT:
-                pass
-            # moving from client
-            elif robot.on_client() and robot.dest_description == ON_BASE:
-                if len(tables_queue) > 0 and robot.client_count <= 2:
-                    robot.get_next_client(tables_queue.pop(0))
-                    robot.client_count += 1
-                    robot.total_served_client_count += 1
-            # came to client
-            elif robot.on_client() and robot.dest_description == ON_CLIENT:
-                robot.set_path_to_base()
-                for table in tables:
-                    if robot.get_current_pos() == table.get_stay_point():
-                        table.set_not_ready()
-                        table.set_time_count(10)
+        # back
+        #     # init pos/ came to base
+        #     if robot.on_base() and robot.dest_description == ON_BASE:
+        #         robot.client_count = 0
+        #         if len(tables_queue) > 0:
+        #             robot.get_next_client(tables_queue.pop(0))
+        #             robot.client_count += 1
+        #             robot.total_served_client_count += 1
+        #         else:
+        #             robot.set_path_to_base()
+        #     # moving from base
+        #     elif robot.on_base() and robot.dest_description == ON_CLIENT:
+        #         pass
+        #     # moving from client
+        #     elif robot.on_client() and robot.dest_description == ON_BASE:
+        #         if len(tables_queue) > 0 and robot.client_count <= 2:
+        #             robot.get_next_client(tables_queue.pop(0))
+        #             robot.client_count += 1
+        #             robot.total_served_client_count += 1
+        #     # came to client
+        #     elif robot.on_client() and robot.dest_description == ON_CLIENT:
+        #         robot.set_path_to_base()
+        #         for table in tables:
+        #             if robot.get_current_pos() == table.get_stay_point():
+        #                 table.set_not_ready()
+        #                 table.set_time_count(10)
+        #
+        #     # moving to base
+        #     elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_BASE:
+        #         if len(tables_queue) > 0 and robot.client_count < 2:
+        #             robot.get_next_client(tables_queue.pop(0))
+        #             robot.client_count += 1
+        #             robot.total_served_client_count += 1
+        #     # moving to client
+        #     elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
+        #         pass #still move to client
 
-            # moving to base
-            elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_BASE:
-                if len(tables_queue) > 0 and robot.client_count < 2:
-                    robot.get_next_client(tables_queue.pop(0))
-                    robot.client_count += 1
-                    robot.total_served_client_count += 1
-            # moving to client
-            elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
-                pass #still move to client
+
 
             robot.make_step(OD)
+            entities.draw(screen)
+            pygame.display.update()
+
 
         # add client
-        for table in tables:
-            table.dec_time_count()
-            if table.status == NOT_READY_STATUS and table not in tables_queue:
-                if table.time_count <= 0:
-                    table.set_ready()
-                    tables_queue.append(table)
+        # for table in tables:
+        #     table.dec_time_count()
+        #     if table.status == NOT_READY_STATUS and table not in tables_queue:
+        #         if table.time_count <= 0:
+        #             table.set_ready()
+        #             tables_queue.append(table)
 
 
-        entities.draw(screen)
+        #back
+        # entities.draw(screen)
 
-        pygame.display.update()     # обновление и вывод всех изменений на экран
+        #back
+        # pygame.display.update()     # обновление и вывод всех изменений на экран
+        # print('updated display')
 
 
 if __name__ == "__main__":
