@@ -121,13 +121,14 @@ def main():
     table9 = Table(15, 11, CELL_SIZE)
     tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
     busy_tables = []
+    meals_queue = []
 
 
     people_julia = People('Julia', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     peoples = [people_julia]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot5 = Robot(START_CELL_X, START_CELL_Y+12, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -135,10 +136,11 @@ def main():
     # robots = [robot1, robot2, robot3, robot4, robot5, robot6]
     ##to_remove
     robot1.set_path(4,6)
-    robot2.set_path(2,3)
-    robots = [robot1, robot2]
+    # robot2.set_path(2,3)
+    robots = [robot1]
     OD = ObstaclesDefiner(robots=robots, peoples=[people_julia])
 
+    # очередь столов с заказами
     tables_queue = []
     for table in tables:
         entities.add(table)
@@ -200,11 +202,14 @@ def main():
 
 
 
-            robot.make_step(OD)
+            robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue)
             entities.draw(screen)
             pygame.display.update()
         for p in peoples:
-            people.execute(OD=OD, tables=tables, busy_tables=busy_tables)
+            people.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue)
+            entities.draw(screen)
+            pygame.display.update()
+
 
 
         # add client

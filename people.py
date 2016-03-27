@@ -6,6 +6,8 @@ from itertools import product
 from pygame import *
 from astar.astar_grid import *
 
+from common_vars import TABLE_STATUSES
+
 
 CELL_SIZE = 32
 MOVE_SPEED = CELL_SIZE
@@ -15,6 +17,8 @@ ON_CLIENT = 'on_client'
 ON_BASE = 'on_base'
 ON_TABLE = 'on_table'
 COLOR = "#888888"
+READY_TO_ORDER = 'ready_to_order'
+
 
 class People(sprite.Sprite):
     def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers):
@@ -38,7 +42,9 @@ class People(sprite.Sprite):
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
         self.current_task = None
-        self.tasks = [self.move_to_table, self.get_free_table, ]
+        self.have_order = None
+        self.tasks = [self.take_table, self.move_to_table, self.get_free_table, ]
+        self.table = None
 
     def get_tables_area(self):
         tables_area = []
@@ -141,7 +147,19 @@ class People(sprite.Sprite):
             self.set_path_to_table()
         OD = kwargs['OD']
         self.make_step(OD)
-        self.tasks.append(self.move_to_table)
+        if len(self.path) > 0:
+            self.tasks.append(self.move_to_table)
+
+    # делаем стол красным и кладем задачу в очередь для робота
+    def take_table(self, *args, **kwargs):
+        tables_queue = kwargs['tables_queue']
+        # еще не делали заказ и уже за столом=> зовем официанта
+        if not self.have_order and (self.cell_current_x, self.cell_current_y) == self.table.get_sit_point():
+            print('call waitress')
+            self.table.set_ready(TABLE_STATUSES['MAKE_ORDER'])
+            self.have_order = True
+            tables_queue.append(self.table)
+
 
     def execute(self, *args, **kwargs):
         if len(self.tasks) > 0:
