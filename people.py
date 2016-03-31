@@ -6,7 +6,8 @@ from itertools import product
 from pygame import *
 from astar.astar_grid import *
 
-from common_vars import TABLE_STATUSES
+from common_vars import TABLE_STATUSES, PEOPLE_STATUSES
+from orders import Lanch
 
 
 CELL_SIZE = 32
@@ -42,8 +43,8 @@ class People(sprite.Sprite):
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
         self.current_task = None
-        self.have_order = None
-        self.tasks = [self.take_table, self.move_to_table, self.get_free_table, ]
+        self.status = PEOPLE_STATUSES['JUST_CAME']
+        self.tasks = [self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
         self.table = None
 
     def get_tables_area(self):
@@ -150,14 +151,29 @@ class People(sprite.Sprite):
         if len(self.path) > 0:
             self.tasks.append(self.move_to_table)
 
+    # ждем официанта для заказа
+    def wait_to_make_order(self, *args, **kwargs):
+        # робот пришел к столу и мы с ним обсудили заказ
+        if self.table.status == TABLE_STATUSES['WAITING_MEAL']:
+            self.status == PEOPLE_STATUSES['WAITING_MEAL']
+        else:
+            # робот еще не пришел, ждем
+            self.tasks.append(self.wait_to_make_order)
+
+
+
+
     # делаем стол красным и кладем задачу в очередь для робота
     def take_table(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
         # еще не делали заказ и уже за столом=> зовем официанта
-        if not self.have_order and (self.cell_current_x, self.cell_current_y) == self.table.get_sit_point():
+        if self.status == PEOPLE_STATUSES['JUST_CAME'] and (self.cell_current_x, self.cell_current_y) == self.table.get_sit_point():
             print('call waitress')
-            self.table.set_ready(TABLE_STATUSES['MAKE_ORDER'])
-            self.have_order = True
+            print('self table people')
+            print(self.table)
+            self.status = PEOPLE_STATUSES['WAITING_TO_MAKE_ORDER']
+            self.table.set_ready(TABLE_STATUSES['WAITING_TO_MAKE_ORDER'])
+            self.table.order = Lanch(self.table)
             tables_queue.append(self.table)
 
 
@@ -166,7 +182,7 @@ class People(sprite.Sprite):
             self.current_task = self.tasks.pop()
             self.current_task(*args, **kwargs)
         else:
-            print('wait')
+            print('people have no task')
 
 
 

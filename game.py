@@ -12,6 +12,7 @@ from robot import *
 from people import *
 from table import *
 from astar.astar_grid import *
+from chef import Chef
 from time import sleep
 
 
@@ -122,8 +123,9 @@ def main():
     tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
     busy_tables = []
     meals_queue = []
+    cooking_meals = []
 
-
+    chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
     people_julia = People('Julia', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     peoples = [people_julia]
 
@@ -202,13 +204,17 @@ def main():
 
 
 
-            robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue)
+            robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
         for p in peoples:
-            people.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue)
+            people.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
+
+        chef.cook()
+
+
 
 
 

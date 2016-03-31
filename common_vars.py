@@ -1,7 +1,20 @@
 # -*- coding: utf-8 -*-
 
-TABLE_STATUSES = {'MAKE_ORDER': 01,
-                  'GET_THE_BILL': 02,
-                  'NOT_READY': 03,
-                 }
+TABLE_STATUSES = {
+    'WAITING_TO_MAKE_ORDER': 01,
+    'WAITING_MEAL': 02,
+    'EATING': 03,
+    'WAITING_BILL': 04,
+    'WAITING_CLEAN': 05,
+    'NOT_READY': 06,
+}
 
+PEOPLE_STATUSES = {
+    'JUST_CAME': 01,
+    'WAITING_TO_MAKE_ORDER': 02,
+    'WAITING_MEAL': 03,
+    'EATING': 04,
+    'WAITING_BILL': 05,
+    'WAITING_CLEAN': 06,
+    'GO_HOME': 07
+}

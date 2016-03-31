@@ -194,13 +194,21 @@ class Robot(sprite.Sprite):
         # если дошли до стола
         if len(self.path) == 0 and self.get_current_pos() == self.table.get_stay_point():
             self.table.set_not_ready()
+            print('self table')
+            print(self.table)
             self.tasks.append(self.conversation)
 
     # общаемся с клиентом
     def conversation(self, *args, **kwargs):
+        meals_queue = kwargs['meals_queue']
         self.conversation_count += 1
         # поговорили => берем новую задачу
         if self.conversation_count > self.conversation_limit:
+            if self.table.status == TABLE_STATUSES['WAITING_TO_MAKE_ORDER']:
+                # теперь ждем еду
+                self.table.status = TABLE_STATUSES['WAITING_MEAL']
+                meals_queue.append(self.table.order)
+
             self.tasks.append(self.update_task)
             print('get next task')
         else:
