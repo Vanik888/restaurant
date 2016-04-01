@@ -120,6 +120,22 @@ class Robot(sprite.Sprite):
         self.dest_description = ON_BASE
         self.tasks.append(self.move_to_base)
 
+    # идем за едой
+    def get_waiting_meal(self, *args, **kwargs):
+        meals_queue = kwargs['meals_queue']
+        self.meal = meals_queue.pop()
+        self.table = self.meal.table
+
+        # уже на базе, можно сразу забрать еду
+        if self.on_base():
+            self.tasks.append(self.set_path_to_table)
+
+
+        # destination = (self.cell_start_x, self.cell_start_y)
+        # self.set_path()
+        #
+
+
     def move_to_base(self, *args, **kwargs):
         OD = kwargs['OD']
         tables_queue = kwargs['tables_queue']
@@ -175,7 +191,6 @@ class Robot(sprite.Sprite):
     def get_waiting_table(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
         self.table = tables_queue.pop()
-        self.path = self.set_path_to_table()
         self.tasks.append(self.set_path_to_table)
 
     # сетим путь до стола
@@ -193,21 +208,20 @@ class Robot(sprite.Sprite):
             self.tasks.append(self.move_to_table)
         # если дошли до стола
         if len(self.path) == 0 and self.get_current_pos() == self.table.get_stay_point():
-            self.table.set_not_ready()
-            print('self table')
-            print(self.table)
             self.tasks.append(self.conversation)
 
     # общаемся с клиентом
     def conversation(self, *args, **kwargs):
-        meals_queue = kwargs['meals_queue']
+        cooking_meals = kwargs['cooking_meals']
         self.conversation_count += 1
         # поговорили => берем новую задачу
         if self.conversation_count > self.conversation_limit:
             if self.table.status == TABLE_STATUSES['WAITING_TO_MAKE_ORDER']:
                 # теперь ждем еду
-                self.table.status = TABLE_STATUSES['WAITING_MEAL']
-                meals_queue.append(self.table.order)
+                self.table.set_not_ready(TABLE_STATUSES['WAITING_MEAL'])
+                cooking_meals.append(self.table.order)
+            elif self.table.status == TABLE_STATUSES['WAITING_MEAL']:
+                self.table.set_not_ready(TABLE_STATUSES['EATING'])
 
             self.tasks.append(self.update_task)
             print('get next task')
@@ -220,7 +234,8 @@ class Robot(sprite.Sprite):
         meals_queue = kwargs['meals_queue']
         if len(tables_queue) > len(meals_queue):
             self.tasks.append(self.get_waiting_table)
-
+        else:
+            self.tasks.append(self.get_waiting_meal)
         # нечего делать => идем на базу
         if len(tables_queue) == 0 and len(meals_queue) == 0:
             self.tasks.append(self.set_path_to_base)

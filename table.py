@@ -48,8 +48,8 @@ class Table(sprite.Sprite):
         self.status = order_type
         draw.circle(self.image, RED, (self.CELL_SIZE, self.CELL_SIZE), self.CELL_SIZE, 0)
 
-    def set_not_ready(self):
-        self.status = TABLE_STATUSES['NOT_READY']
+    def set_not_ready(self, STATUS):
+        self.status = STATUS if STATUS else TABLE_STATUSES['NOT_READY']
         draw.circle(self.image, BLUE, (self.CELL_SIZE, self.CELL_SIZE), self.CELL_SIZE, 0)
 
     def make_ready(self):

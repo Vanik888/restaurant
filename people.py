@@ -44,7 +44,7 @@ class People(sprite.Sprite):
         self.path = None
         self.current_task = None
         self.status = PEOPLE_STATUSES['JUST_CAME']
-        self.tasks = [self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
+        self.tasks = [self.waiting_meal, self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
         self.table = None
 
     def get_tables_area(self):
@@ -160,6 +160,14 @@ class People(sprite.Sprite):
             # робот еще не пришел, ждем
             self.tasks.append(self.wait_to_make_order)
 
+    def waiting_meal(self, *args, **kwargs):
+        # робот принес еду
+        if self.table.status == TABLE_STATUSES['EATING']:
+            self.status == PEOPLE_STATUSES['EATING']
+        # робот еще не принес еду
+        else:
+            self.tasks.append(self.waiting_meal)
+
 
 
 
@@ -175,6 +183,8 @@ class People(sprite.Sprite):
             self.table.set_ready(TABLE_STATUSES['WAITING_TO_MAKE_ORDER'])
             self.table.order = Lanch(self.table)
             tables_queue.append(self.table)
+
+
 
 
     def execute(self, *args, **kwargs):
