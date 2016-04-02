@@ -17,6 +17,7 @@ HEIGHT = CELL_SIZE
 ON_CLIENT = 'on_client'
 ON_BASE = 'on_base'
 ON_TABLE = 'on_table'
+ON_OUT = 'on_out'
 COLOR = "#888888"
 READY_TO_ORDER = 'ready_to_order'
 
@@ -44,13 +45,22 @@ class People(sprite.Sprite):
         self.path = None
         self.current_task = None
         self.status = PEOPLE_STATUSES['JUST_CAME']
-        self.tasks = [self.get_the_bill, self.eating, self.waiting_meal, self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
+        self.tasks = [self.move_to_dest,
+                      self.get_out,
+                      self.waiting_the_bill,
+                      self.get_the_bill,
+                      self.eating,
+                      self.waiting_meal,
+                      self.wait_to_make_order,
+                      self.take_table,
+                      self.move_to_dest,
+                      self.get_free_table,
+                      ]
         self.table = None
-        self.eat_time = 10
+        self.eat_time = 3
 
     def eat(self):
         self.eat_time -= 1
-        print('%s eating' % self.name)
         return self.eat_time != 0
 
     def get_tables_area(self):
@@ -97,6 +107,7 @@ class People(sprite.Sprite):
     def make_step(self, od):
         if len(self.path) > 0:
             next_cell = self.path.pop(0)
+            print(next_cell.x, next_cell.y)
             if (od.is_clear(next_cell.x, next_cell.y)):
                 self.rect.x = next_cell.x * CELL_SIZE
                 self.rect.y = next_cell.y * CELL_SIZE
@@ -138,6 +149,8 @@ class People(sprite.Sprite):
             if t not in busy_tables:
                 busy_tables.append(t)
                 self.table = t
+                # установили путь до стола
+                self.set_path_to_table()
                 return
         print('all tables are busy')
         self.tasks.append(self.get_free_table)
@@ -149,13 +162,13 @@ class People(sprite.Sprite):
         self.dest_description = ON_TABLE
 
     # шагаем до стола
-    def move_to_table(self, *args, **kwargs):
-        if not self.path:
-            self.set_path_to_table()
+    def move_to_dest(self, *args, **kwargs):
+        # if not self.path:
+        #     self.set_path_to_table()
         OD = kwargs['OD']
         self.make_step(OD)
         if len(self.path) > 0:
-            self.tasks.append(self.move_to_table)
+            self.tasks.append(self.move_to_dest)
 
     # ждем официанта для заказа
     def wait_to_make_order(self, *args, **kwargs):
@@ -173,6 +186,7 @@ class People(sprite.Sprite):
             self.status = PEOPLE_STATUSES['EATING']
         # робот еще не принес еду
         else:
+            print('%s waiting meal' % self.name)
             self.tasks.append(self.waiting_meal)
 
     # задача- поесть
@@ -180,9 +194,10 @@ class People(sprite.Sprite):
         if self.status == PEOPLE_STATUSES['EATING']:
             # если еще не доели
             if self.eat():
+                print('%s eating' % self.name)
                 self.tasks.append(self.eating)
             else:
-                print('people ended eating')
+                print('%s ended eating' % self.name)
 
     # вызываем официанта для того, чтобы получить счет
     def get_the_bill(self, *args, **kwargs):
@@ -191,18 +206,29 @@ class People(sprite.Sprite):
             self.table.set_ready(TABLE_STATUSES['WAITING_BILL'])
             self.status = PEOPLE_STATUSES['WAITING_BILL']
             tables_queue.append(self.table)
+            print('%s calls waiter for bill' % self.name)
 
     # ждем робота
     def waiting_the_bill(self, *args, **kwargs):
         # пока робот не пришел
-        if self.table == TABLE_STATUSES['WAITING_BILL']:
+        if self.table.status == TABLE_STATUSES['WAITING_BILL']:
             print('%s waiting the bill' % self.name)
             self.tasks.append(self.waiting_the_bill)
         else:
             print('%s robot brang the bill' % self.name)
 
     # идем на базовую точку, чистим стол
-    def go_home(self, *args, **kwargs):
+    def get_out(self, *args, **kwargs):
+        print('%s goes to out' % self.name)
+        self.set_path_to_out()
+        self.table.set_not_ready(TABLE_STATUSES['NOT_READY'])
+
+    # устанавливаем путь до отхода
+    def set_path_to_out(self):
+        destination = (self.cell_start_x, self.cell_start_y)
+        print("out x=%s, y=%s" % destination)
+        self.set_path(*destination)
+        self.dest_description = ON_OUT
 
 
 

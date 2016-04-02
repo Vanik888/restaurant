@@ -42,7 +42,7 @@ class Robot(sprite.Sprite):
         self.path = None
 
         self.current_task = None
-        self.tasks = [self.update_task]
+        self.tasks = [self.update_task, self.update_task]
         self.table = None
         self.conversation_limit = 5
         self.conversation_count = 0
@@ -175,7 +175,7 @@ class Robot(sprite.Sprite):
     def print_path_diff(self, old_path, new_path):
         old_path = [(p.x, p.y)for p in old_path]
         new_path = [(p.x, p.y)for p in new_path]
-        print('old path: ' + str(old_path))
+        print('sold path: ' + str(old_path))
         print('new path: ' + str(new_path))
 
 
@@ -185,7 +185,8 @@ class Robot(sprite.Sprite):
             self.current_task = self.tasks.pop()
             self.current_task(*args, **kwargs)
         else:
-            print('wait')
+            print('%s has no task' % self.name)
+            self.tasks.append(self.update_task)
 
     # выбираем стол, к которому подойти
     def get_waiting_table(self, *args, **kwargs):
@@ -222,21 +223,25 @@ class Robot(sprite.Sprite):
                 cooking_meals.append(self.table.order)
             elif self.table.status == TABLE_STATUSES['WAITING_MEAL']:
                 self.table.set_not_ready(TABLE_STATUSES['EATING'])
+            elif self.table.status == TABLE_STATUSES['WAITING_BILL']:
+                self.table.set_not_ready(TABLE_STATUSES['NOT_READY'])
 
             self.tasks.append(self.update_task)
-            print('get next task')
+            print('%s: get next task' % self.name)
         else:
             self.tasks.append(self.conversation)
-            print('make conversation')
+            print('%s: make conversation' % self.name)
 
     def update_task(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
         meals_queue = kwargs['meals_queue']
-        if len(tables_queue) > len(meals_queue):
-            self.tasks.append(self.get_waiting_table)
-        else:
-            self.tasks.append(self.get_waiting_meal)
         # нечего делать => идем на базу
         if len(tables_queue) == 0 and len(meals_queue) == 0:
             self.tasks.append(self.set_path_to_base)
-            print('table queue and meals queue are empty. nothing to do')
+            print('%s: table queue and meals queue are empty. nothing to do' %self.name)
+
+        elif len(tables_queue) >= len(meals_queue):
+            self.tasks.append(self.get_waiting_table)
+        elif len(tables_queue) < len(meals_queue):
+            self.tasks.append(self.get_waiting_meal)
+

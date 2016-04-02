@@ -165,45 +165,6 @@ def main():
 
         robots.reverse()
         for robot in robots:
-        # back
-        #     # init pos/ came to base
-        #     if robot.on_base() and robot.dest_description == ON_BASE:
-        #         robot.client_count = 0
-        #         if len(tables_queue) > 0:
-        #             robot.get_next_client(tables_queue.pop(0))
-        #             robot.client_count += 1
-        #             robot.total_served_client_count += 1
-        #         else:
-        #             robot.set_path_to_base()
-        #     # moving from base
-        #     elif robot.on_base() and robot.dest_description == ON_CLIENT:
-        #         pass
-        #     # moving from client
-        #     elif robot.on_client() and robot.dest_description == ON_BASE:
-        #         if len(tables_queue) > 0 and robot.client_count <= 2:
-        #             robot.get_next_client(tables_queue.pop(0))
-        #             robot.client_count += 1
-        #             robot.total_served_client_count += 1
-        #     # came to client
-        #     elif robot.on_client() and robot.dest_description == ON_CLIENT:
-        #         robot.set_path_to_base()
-        #         for table in tables:
-        #             if robot.get_current_pos() == table.get_stay_point():
-        #                 table.set_not_ready()
-        #                 table.set_time_count(10)
-        #
-        #     # moving to base
-        #     elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_BASE:
-        #         if len(tables_queue) > 0 and robot.client_count < 2:
-        #             robot.get_next_client(tables_queue.pop(0))
-        #             robot.client_count += 1
-        #             robot.total_served_client_count += 1
-        #     # moving to client
-        #     elif not robot.on_client() and not robot.on_base() and robot.dest_description == ON_CLIENT:
-        #         pass #still move to client
-
-
-
             robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
@@ -213,27 +174,6 @@ def main():
             pygame.display.update()
 
         chef.cook()
-
-
-
-
-
-        # add client
-        # for table in tables:
-        #     table.dec_time_count()
-        #     if table.status == NOT_READY_STATUS and table not in tables_queue:
-        #         if table.time_count <= 0:
-        #             table.set_ready()
-        #             tables_queue.append(table)
-
-
-        #back
-        # entities.draw(screen)
-
-        #back
-        # pygame.display.update()     # обновление и вывод всех изменений на экран
-        # print('updated display')
-
 
 if __name__ == "__main__":
     main()
