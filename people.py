@@ -44,8 +44,14 @@ class People(sprite.Sprite):
         self.path = None
         self.current_task = None
         self.status = PEOPLE_STATUSES['JUST_CAME']
-        self.tasks = [self.waiting_meal, self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
+        self.tasks = [self.get_the_bill, self.eating, self.waiting_meal, self.wait_to_make_order, self.take_table, self.move_to_table, self.get_free_table, ]
         self.table = None
+        self.eat_time = 10
+
+    def eat(self):
+        self.eat_time -= 1
+        print('%s eating' % self.name)
+        return self.eat_time != 0
 
     def get_tables_area(self):
         tables_area = []
@@ -160,13 +166,45 @@ class People(sprite.Sprite):
             # робот еще не пришел, ждем
             self.tasks.append(self.wait_to_make_order)
 
+    # ждем официанта с заказом
     def waiting_meal(self, *args, **kwargs):
         # робот принес еду
         if self.table.status == TABLE_STATUSES['EATING']:
-            self.status == PEOPLE_STATUSES['EATING']
+            self.status = PEOPLE_STATUSES['EATING']
         # робот еще не принес еду
         else:
             self.tasks.append(self.waiting_meal)
+
+    # задача- поесть
+    def eating(self, *args, **kwargs):
+        if self.status == PEOPLE_STATUSES['EATING']:
+            # если еще не доели
+            if self.eat():
+                self.tasks.append(self.eating)
+            else:
+                print('people ended eating')
+
+    # вызываем официанта для того, чтобы получить счет
+    def get_the_bill(self, *args, **kwargs):
+        tables_queue = kwargs['tables_queue']
+        if self.status == PEOPLE_STATUSES['EATING']:
+            self.table.set_ready(TABLE_STATUSES['WAITING_BILL'])
+            self.status = PEOPLE_STATUSES['WAITING_BILL']
+            tables_queue.append(self.table)
+
+    # ждем робота
+    def waiting_the_bill(self, *args, **kwargs):
+        # пока робот не пришел
+        if self.table == TABLE_STATUSES['WAITING_BILL']:
+            print('%s waiting the bill' % self.name)
+            self.tasks.append(self.waiting_the_bill)
+        else:
+            print('%s robot brang the bill' % self.name)
+
+    # идем на базовую точку, чистим стол
+    def go_home(self, *args, **kwargs):
+
+
 
 
 

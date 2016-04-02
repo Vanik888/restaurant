@@ -109,9 +109,9 @@ def main():
 
     barriers = get_static_barriers(level)
 
-    START_CELL_X = 1
-    START_CELL_Y = 1
-    table1 = Table(5, 5, CELL_SIZE)
+    START_CELL_X = 2
+    START_CELL_Y = 2
+    table1 = Table(3, 3, CELL_SIZE)
     table2 = Table(5, 8, CELL_SIZE)
     table3 = Table(5, 11, CELL_SIZE)
     table4 = Table(10, 5, CELL_SIZE)
@@ -126,7 +126,7 @@ def main():
     cooking_meals = []
 
     chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
-    people_julia = People('Julia', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    people_julia = People('Julia', 5, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
     peoples = [people_julia]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -137,7 +137,7 @@ def main():
     # robot6 = Robot(START_CELL_X, START_CELL_Y+15, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robots = [robot1, robot2, robot3, robot4, robot5, robot6]
     ##to_remove
-    robot1.set_path(4,6)
+    # robot1.set_path(4,6)
     # robot2.set_path(2,3)
     robots = [robot1]
     OD = ObstaclesDefiner(robots=robots, peoples=[people_julia])
