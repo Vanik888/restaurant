@@ -22,7 +22,7 @@ class AbstractOrder(object):
 class Lanch(AbstractOrder):
     def __init__(self, table):
         super(Lanch, self).__init__()
-        self.wait_time = 12
+        self.wait_time = 1
         self.table = table
 
 

@@ -7,13 +7,12 @@ from pygame import *
 from astar.astar_grid import *
 
 from common_vars import TABLE_STATUSES
+from common_vars import ROBOT_STATUSES
 
 CELL_SIZE = 32
 MOVE_SPEED = CELL_SIZE
 WIDTH = CELL_SIZE
 HEIGHT = CELL_SIZE
-ON_CLIENT = 'on_client'
-ON_BASE = 'on_base'
 COLOR = "#888888"
 
 
@@ -27,7 +26,7 @@ class Robot(sprite.Sprite):
         self.cell_current_y = cell_start_y
         self.client_count = 0
         self.total_served_client_count = 0
-        self.dest_description = ON_BASE
+        self.dest_description = ROBOT_STATUSES['NO_TASKS']
         self.tables = tables
         self.cart_field_width = cart_field_width
         self.cart_field_height = cart_field_height
@@ -42,7 +41,7 @@ class Robot(sprite.Sprite):
         self.path = None
 
         self.current_task = None
-        self.tasks = [self.update_task, self.update_task]
+        self.tasks = [ self.update_task]
         self.table = None
         self.conversation_limit = 5
         self.conversation_count = 0
@@ -117,7 +116,6 @@ class Robot(sprite.Sprite):
     def set_path_to_base(self, *args, **kwargs):
         destination = (self.cell_start_x, self.cell_start_y)
         self.set_path(*destination)
-        self.dest_description = ON_BASE
         self.tasks.append(self.move_to_base)
 
     # идем за едой
@@ -125,10 +123,16 @@ class Robot(sprite.Sprite):
         meals_queue = kwargs['meals_queue']
         self.meal = meals_queue.pop()
         self.table = self.meal.table
-
+        # по пути не отвлекаемся, приносим идем за едой
+        self.dest_description = ROBOT_STATUSES['BRING_MEAL']
         # уже на базе, можно сразу забрать еду
         if self.on_base():
+            print('%s is already on base move meal to table' % self.name)
             self.tasks.append(self.set_path_to_table)
+        else:
+            print('%s move to base to get meal and then move to table' % self.name)
+            self.tasks.append(self.set_path_to_table)
+            self.tasks.append(self.set_path_to_base)
 
 
         # destination = (self.cell_start_x, self.cell_start_y)
@@ -141,27 +145,20 @@ class Robot(sprite.Sprite):
         tables_queue = kwargs['tables_queue']
         meals_queue = kwargs['meals_queue']
         self.make_step(OD)
-        # пока шли- появлились заказы или приготовилась еда
-        if len(tables_queue) > 0 or len(meals_queue) > 0:
-            if len(tables_queue) > len(meals_queue):
+
+        # пока шли- появлились заказы или приготовилась
+        #  еда и при этом мы не уносим тарелки и не идем за едой
+        if (len(tables_queue) > 0 or len(meals_queue) > 0) and\
+            self.dest_description == ROBOT_STATUSES['NO_TASKS']:
+            if len(tables_queue) >= len(meals_queue):
                 self.tasks.append(self.get_waiting_table)
             else:
                 # пойти за едой
-                pass
+                self.tasks.append(self.get_waiting_meal)
         else:
-            # если дошли до базы, выбираем другую задачу
-            if self.on_base():
-                self.tasks.append(self.update_task)
-            elif len(self.path) > 0:
+            if not self.on_base():
                 self.tasks.append(self.move_to_base)
 
-
-
-    def get_next_client(self, client):
-        destination = client.get_stay_point()
-        self.client_destination = destination
-        self.set_path(*destination)
-        self.dest_description = ON_CLIENT
 
     # создаем новый путь с учетом препятствия x, y
     def update_path(self, obstacle_x, obstacle_y):
@@ -198,7 +195,7 @@ class Robot(sprite.Sprite):
     def set_path_to_table(self, *args, **kwargs):
         destination = self.table.get_stay_point()
         self.set_path(*destination)
-        self.dest_description = ON_CLIENT
+#        self.dest_description = ON_CLIENT
         self.tasks.append(self.move_to_table)
 
     # идем к столу
@@ -220,12 +217,17 @@ class Robot(sprite.Sprite):
             if self.table.status == TABLE_STATUSES['WAITING_TO_MAKE_ORDER']:
                 # теперь ждем еду
                 self.table.set_not_ready(TABLE_STATUSES['WAITING_MEAL'])
+                # свободны для других задач
+                self.dest_description = ROBOT_STATUSES['NO_TASKS']
                 cooking_meals.append(self.table.order)
             elif self.table.status == TABLE_STATUSES['WAITING_MEAL']:
                 self.table.set_not_ready(TABLE_STATUSES['EATING'])
+                # свободны для других задач
+                self.dest_description = ROBOT_STATUSES['NO_TASKS']
             elif self.table.status == TABLE_STATUSES['WAITING_BILL']:
                 self.table.set_not_ready(TABLE_STATUSES['NOT_READY'])
-
+                # уносим тарелки
+                self.dest_description = ROBOT_STATUSES['CLEAN_TABLE']
             self.tasks.append(self.update_task)
             print('%s: get next task' % self.name)
         else:

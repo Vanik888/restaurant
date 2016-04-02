@@ -18,3 +18,9 @@ PEOPLE_STATUSES = {
     'WAITING_CLEAN': 06,
     'GO_HOME': 07
 }
+
+ROBOT_STATUSES = {
+    'NO_TASKS': 01,
+    'CLEAN_TABLE': 02,
+    'BRING_MEAL': 03,
+}
