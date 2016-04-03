@@ -220,16 +220,16 @@ class Robot(sprite.Sprite):
         if self.conversation_count > self.conversation_limit:
             if self.table.status == TABLE_STATUSES['WAITING_TO_MAKE_ORDER']:
                 # теперь ждем еду
-                self.table.set_not_ready(TABLE_STATUSES['WAITING_MEAL'])
+                self.table.set_status(TABLE_STATUSES['WAITING_MEAL'])
                 # свободны для других задач
                 self.dest_description = ROBOT_STATUSES['NO_TASKS']
                 cooking_meals.append(self.table.order)
             elif self.table.status == TABLE_STATUSES['WAITING_MEAL']:
-                self.table.set_not_ready(TABLE_STATUSES['EATING'])
+                self.table.set_status(TABLE_STATUSES['EATING'])
                 # свободны для других задач
                 self.dest_description = ROBOT_STATUSES['NO_TASKS']
             elif self.table.status == TABLE_STATUSES['WAITING_BILL']:
-                self.table.set_not_ready(TABLE_STATUSES['NOT_READY'])
+                self.table.set_status(TABLE_STATUSES['NOT_READY'])
                 # уносим тарелки
                 self.dest_description = ROBOT_STATUSES['CLEAN_TABLE']
             self.tasks.append(self.update_task)

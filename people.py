@@ -220,7 +220,7 @@ class People(sprite.Sprite):
     def get_the_bill(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
         if self.status == PEOPLE_STATUSES['EATING']:
-            self.table.set_ready(TABLE_STATUSES['WAITING_BILL'])
+            self.table.set_status(TABLE_STATUSES['WAITING_BILL'])
             self.status = PEOPLE_STATUSES['WAITING_BILL']
             tables_queue.append(self.table)
             print('%s calls waiter for bill' % self.name)
@@ -238,7 +238,7 @@ class People(sprite.Sprite):
     def get_out(self, *args, **kwargs):
         print('%s goes to out' % self.name)
         self.set_path_to_out()
-        self.table.set_not_ready(TABLE_STATUSES['NOT_READY'])
+        self.table.set_status(TABLE_STATUSES['NOT_READY'])
 
     # устанавливаем путь до отхода
     def set_path_to_out(self):
@@ -261,7 +261,7 @@ class People(sprite.Sprite):
             print('self table people')
             print(self.table)
             self.status = PEOPLE_STATUSES['WAITING_TO_MAKE_ORDER']
-            self.table.set_ready(TABLE_STATUSES['WAITING_TO_MAKE_ORDER'])
+            self.table.set_status(TABLE_STATUSES['WAITING_TO_MAKE_ORDER'])
             self.table.order = Lanch(self.table)
             tables_queue.append(self.table)
 
