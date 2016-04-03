@@ -130,6 +130,23 @@ class People(sprite.Sprite):
                     print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
                     print('skip the step')
 
+
+     # создаем новый путь с учетом препятствия x, y
+    def update_path(self, obstacle_x, obstacle_y):
+        destination = self.path[0].get_cart_coordinates()
+        old_path = self.path
+        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
+        new_path = self.path
+        self.print_path_diff(old_path, new_path)
+
+    # принтим старый путь и новый
+    def print_path_diff(self, old_path, new_path):
+        old_path = [(p.x, p.y)for p in old_path]
+        new_path = [(p.x, p.y)for p in new_path]
+        print('sold path: ' + str(old_path))
+        print('new path: ' + str(new_path))
+
+
     def set_path_to_base(self):
         destination = (self.cell_start_x, self.cell_start_y)
         self.set_path(*destination)
@@ -152,7 +169,7 @@ class People(sprite.Sprite):
                 # установили путь до стола
                 self.set_path_to_table()
                 return
-        print('all tables are busy')
+        print('%s: all tables are busy' % self.name)
         self.tasks.append(self.get_free_table)
 
     # засетили путь до стола

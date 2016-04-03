@@ -127,7 +127,8 @@ def main():
 
     chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
     people_julia = People('Julia', 5, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    peoples = [people_julia]
+    people_anna = People('ANNA', 9, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    peoples = [people_julia, people_anna]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -169,7 +170,7 @@ def main():
             entities.draw(screen)
             pygame.display.update()
         for p in peoples:
-            people.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
+            p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
 

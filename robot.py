@@ -113,6 +113,24 @@ class Robot(sprite.Sprite):
                     print('skip the step')
 
 
+    # создаем новый путь с учетом препятствия x, y
+    def update_path(self, obstacle_x, obstacle_y):
+        destination = self.path[0].get_cart_coordinates()
+        old_path = self.path
+        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
+        new_path = self.path
+        self.print_path_diff(old_path, new_path)
+
+    # принтим старый путь и новый
+    def print_path_diff(self, old_path, new_path):
+        old_path = [(p.x, p.y)for p in old_path]
+        new_path = [(p.x, p.y)for p in new_path]
+        print('sold path: ' + str(old_path))
+        print('new path: ' + str(new_path))
+
+
+
+
     def set_path_to_base(self, *args, **kwargs):
         destination = (self.cell_start_x, self.cell_start_y)
         self.set_path(*destination)
@@ -121,7 +139,7 @@ class Robot(sprite.Sprite):
     # идем за едой
     def get_waiting_meal(self, *args, **kwargs):
         meals_queue = kwargs['meals_queue']
-        self.meal = meals_queue.pop()
+        self.meal = meals_queue.pop(0)
         self.table = self.meal.table
         # по пути не отвлекаемся, приносим идем за едой
         self.dest_description = ROBOT_STATUSES['BRING_MEAL']
@@ -160,20 +178,6 @@ class Robot(sprite.Sprite):
                 self.tasks.append(self.move_to_base)
 
 
-    # создаем новый путь с учетом препятствия x, y
-    def update_path(self, obstacle_x, obstacle_y):
-        destination = self.path[0].get_cart_coordinates()
-        old_path = self.path
-        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
-        new_path = self.path
-        self.print_path_diff(old_path, new_path)
-
-    # принтим старый путь и новый
-    def print_path_diff(self, old_path, new_path):
-        old_path = [(p.x, p.y)for p in old_path]
-        new_path = [(p.x, p.y)for p in new_path]
-        print('sold path: ' + str(old_path))
-        print('new path: ' + str(new_path))
 
 
     # выполняем задачу
@@ -188,7 +192,7 @@ class Robot(sprite.Sprite):
     # выбираем стол, к которому подойти
     def get_waiting_table(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
-        self.table = tables_queue.pop()
+        self.table = tables_queue.pop(0)
         self.tasks.append(self.set_path_to_table)
 
     # сетим путь до стола
