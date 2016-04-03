@@ -61,7 +61,7 @@ class Table(sprite.Sprite):
         return self.cell_x-1, self.cell_y+1
 
     def get_sit_point(self):
-        return self.cell_x+3, self.cell_y+1
+        return self.cell_x+2, self.cell_y+1
 
     def set_time_count(self, count):
         self.time_count = count

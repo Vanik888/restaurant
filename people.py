@@ -1,6 +1,7 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
+import operator
 from itertools import product
 
 from pygame import *
@@ -162,13 +163,21 @@ class People(sprite.Sprite):
     def get_free_table(self, *args, **kwargs):
         tables = kwargs['tables']
         busy_tables = kwargs['busy_tables']
+        free_tables = {}
         for t in tables:
             if t not in busy_tables:
-                busy_tables.append(t)
-                self.table = t
-                # установили путь до стола
-                self.set_path_to_table()
-                return
+                # считаем расстояние для каждого из свободных столиков
+                x, y = t.get_sit_point()
+                free_tables[t] = sqrt((self.cell_current_x-x)**2 + (self.cell_current_y-y)**2)
+        # если есть свободные столы
+        if len(free_tables) > 0:
+            # сортируем по длине пути
+            t = sorted(free_tables.items(), key=operator.itemgetter(1))[0][0]
+            busy_tables.append(t)
+            self.table = t
+            # установили путь до стола
+            self.set_path_to_table()
+            return
         print('%s: all tables are busy' % self.name)
         self.tasks.append(self.get_free_table)
 

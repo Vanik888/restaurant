@@ -139,18 +139,19 @@ class Robot(sprite.Sprite):
     # идем за едой
     def get_waiting_meal(self, *args, **kwargs):
         meals_queue = kwargs['meals_queue']
-        self.meal = meals_queue.pop(0)
-        self.table = self.meal.table
-        # по пути не отвлекаемся, приносим идем за едой
-        self.dest_description = ROBOT_STATUSES['BRING_MEAL']
-        # уже на базе, можно сразу забрать еду
-        if self.on_base():
-            print('%s is already on base move meal to table' % self.name)
-            self.tasks.append(self.set_path_to_table)
-        else:
-            print('%s move to base to get meal and then move to table' % self.name)
-            self.tasks.append(self.set_path_to_table)
-            self.tasks.append(self.set_path_to_base)
+        if len(meals_queue) > 0:
+            self.meal = meals_queue.pop(0)
+            self.table = self.meal.table
+            # по пути не отвлекаемся, приносим идем за едой
+            self.dest_description = ROBOT_STATUSES['BRING_MEAL']
+            # уже на базе, можно сразу забрать еду
+            if self.on_base():
+                print('%s is already on base move meal to table' % self.name)
+                self.tasks.append(self.set_path_to_table)
+            else:
+                print('%s move to base to get meal and then move to table' % self.name)
+                self.tasks.append(self.set_path_to_table)
+                self.tasks.append(self.set_path_to_base)
 
 
         # destination = (self.cell_start_x, self.cell_start_y)
