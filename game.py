@@ -131,6 +131,7 @@ def main():
     peoples = [people_julia, people_anna]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot2 = Robot('r2', START_CELL_X, START_CELL_Y+10, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -140,8 +141,8 @@ def main():
     ##to_remove
     # robot1.set_path(4,6)
     # robot2.set_path(2,3)
-    robots = [robot1]
-    OD = ObstaclesDefiner(robots=robots, peoples=[people_julia])
+    robots = [robot1, robot2]
+    OD = ObstaclesDefiner(robots=robots, peoples=peoples)
 
     # очередь столов с заказами
     tables_queue = []

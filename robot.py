@@ -182,18 +182,21 @@ class Robot(sprite.Sprite):
 
     # выполняем задачу
     def execute(self, *args, **kwargs):
+        print('%s: execute task' % self.name)
         if len(self.tasks) > 0:
             self.current_task = self.tasks.pop()
             self.current_task(*args, **kwargs)
         else:
-            print('%s has no task' % self.name)
+            print('%s: has no task' % self.name)
             self.tasks.append(self.update_task)
 
     # выбираем стол, к которому подойти
     def get_waiting_table(self, *args, **kwargs):
         tables_queue = kwargs['tables_queue']
-        self.table = tables_queue.pop(0)
-        self.tasks.append(self.set_path_to_table)
+        if len(tables_queue) > 0:
+            self.table = tables_queue.pop(0)
+            self.tasks.append(self.set_path_to_table)
+
 
     # сетим путь до стола
     def set_path_to_table(self, *args, **kwargs):
