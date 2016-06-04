@@ -227,10 +227,13 @@ def main():
             robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
+            screen.blit(bg, (0, 0))
         for p in peoples:
             p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
             entities.draw(screen)
             pygame.display.update()
+            screen.blit(bg, (0, 0))
+            print('move')
 
         chef.cook()
 
