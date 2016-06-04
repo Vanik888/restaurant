@@ -9,6 +9,7 @@ from astar.astar_grid import *
 
 from common_vars import TABLE_STATUSES, PEOPLE_STATUSES
 from orders import Lanch
+from path_cell import PathCell
 
 
 CELL_SIZE = 32
@@ -24,7 +25,7 @@ READY_TO_ORDER = 'ready_to_order'
 
 
 class People(sprite.Sprite):
-    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers):
+    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, entries, game, screen):
         sprite.Sprite.__init__(self)
         self.name = name
         self.cell_start_x = cell_start_x
@@ -60,6 +61,12 @@ class People(sprite.Sprite):
         self.table = None
         self.eat_time = 3
 
+        self.entries = entries
+        self.game = game
+        self.screen = screen
+        self.trajectory = None
+        self.trajectory_changed = False
+
     def eat(self):
         self.eat_time -= 1
         return self.eat_time != 0
@@ -94,7 +101,30 @@ class People(sprite.Sprite):
             nodes[self.cell_current_x][self.cell_current_y],
             nodes[cell_end_x][cell_end_y]
         )
+
+        self.set_trajectory()
+
         self.path.pop(0)
+
+    def remove_trajectory_images(self, entities):
+        for c in self.trajectory:
+            entities.remove(c)
+
+    def draw_path(self, entities):
+        if self.path is not None:
+            if self.trajectory_changed:
+                for c in self.trajectory:
+                    entities.add(c)
+            else:
+                for c in self.trajectory:
+                    entities.remove(c)
+
+
+    def set_trajectory(self):
+        self.trajectory = []
+        self.trajectory_changed = True
+        for p in self.path:
+            self.trajectory.append(PathCell(p.x, p.y, CELL_SIZE))
 
     def on_client(self):
         return (self.cell_current_x, self.cell_current_y) == self.client_destination
@@ -105,7 +135,8 @@ class People(sprite.Sprite):
     def get_current_pos(self):
         return self.cell_current_x, self.cell_current_y
 
-    def make_step(self, od):
+    def make_step(self, od, entities):
+        self.trajectory_changed = False
         if len(self.path) > 0:
             next_cell = self.path.pop(0)
             print(next_cell.x, next_cell.y)
@@ -116,25 +147,28 @@ class People(sprite.Sprite):
                 self.cell_current_y = next_cell.y
             # не последний шаг и есть препятствия => перестраиваем маршрут
             elif len(self.path) != 0:
-                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
+                print('%s: current state is  (x=%s; y=%s)' %(self.name, self.cell_current_x, self.cell_current_y))
                 if not od.no_robots(next_cell.x, next_cell.y):
-                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-                    self.update_path(next_cell.x, next_cell.y)
+                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
+                    self.update_path(next_cell.x, next_cell.y, entities)
                 elif not od.no_peoples(next_cell.x, next_cell.y):
-                    self.update_path(next_cell.x, next_cell.y)
-                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    self.update_path(next_cell.x, next_cell.y, entities)
+                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
             else:
                 if not od.no_robots(next_cell.x, next_cell.y):
-                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-                    print('skip the step')
+                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
+                    print('%s: skip the step')
                 elif not od.no_peoples(next_cell.x, next_cell.y):
-                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-                    print('skip the step')
+                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
+                    print('%s: skip the step')
 
 
      # создаем новый путь с учетом препятствия x, y
-    def update_path(self, obstacle_x, obstacle_y):
-        destination = self.path[0].get_cart_coordinates()
+    def update_path(self, obstacle_x, obstacle_y, entities):
+        print("%s: dest is (x=%s, y=%s)" % (self.name, self.path[0].get_cart_coordinates()[0], self.path[0].get_cart_coordinates()[1]))
+        print("%s: len=%s" % (self.name, str(len(self.path))))
+        destination = self.path[len(self.path)-1].get_cart_coordinates()
+        self.remove_trajectory_images(entities)
         old_path = self.path
         self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
         new_path = self.path
@@ -192,7 +226,8 @@ class People(sprite.Sprite):
         # if not self.path:
         #     self.set_path_to_table()
         OD = kwargs['OD']
-        self.make_step(OD)
+        entities = kwargs['entities']
+        self.make_step(OD, entities)
         if len(self.path) > 0:
             self.tasks.append(self.move_to_dest)
 

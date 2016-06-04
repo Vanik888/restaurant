@@ -44,7 +44,9 @@ class ObstaclesDefiner():
         return self.no_object(x, y, self.peoples)
 
     def is_clear(self, x, y):
-        return self.no_object(x, y, self.robots) and self.no_object(x, y, self.peoples)
+        no_robots = self.no_object(x, y, self.robots)
+        no_peoples = self.no_object(x, y, self.peoples)
+        return no_robots and no_peoples
 
 def get_static_barriers(level):
     x = 0
@@ -138,8 +140,8 @@ def main():
               ]
     barriers = get_static_barriers(level)
 
-    START_CELL_X = 2
-    START_CELL_Y = 2
+    START_CELL_X = 14
+    START_CELL_Y = 4
     table1 = Table(3, 24, CELL_SIZE)
     table2 = Table(3, 20, CELL_SIZE)
     table3 = Table(3, 16, CELL_SIZE)
@@ -183,12 +185,14 @@ def main():
     cooking_meals = []
 
     chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
-    people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
+    people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
+    people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
     peoples = [people_julia, people_anna]
 
-    robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    robot2 = Robot('r2', START_CELL_X, START_CELL_Y+10, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4)
+    robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4)
+    robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -198,7 +202,8 @@ def main():
     ##to_remove
     # robot1.set_path(4,6)
     # robot2.set_path(2,3)
-    robots = [robot1, robot2]
+    robots = [robot1, robot2, robot3]
+    paths = []
     OD = ObstaclesDefiner(robots=robots, peoples=peoples)
 
     # очередь столов с заказами
@@ -225,15 +230,16 @@ def main():
         robots.reverse()
         for robot in robots:
             robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
+            screen.blit(bg, (0, 0))
             entities.draw(screen)
             pygame.display.update()
             screen.blit(bg, (0, 0))
         for p in peoples:
-            p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
+            p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=entities)
+            p.draw_path(entities)
             entities.draw(screen)
             pygame.display.update()
             screen.blit(bg, (0, 0))
-            print('move')
 
         chef.cook()
 

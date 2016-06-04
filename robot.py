@@ -17,13 +17,13 @@ COLOR = "#888888"
 
 
 class Robot(sprite.Sprite):
-    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers):
+    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, init_x, init_y):
         sprite.Sprite.__init__(self)
         self.name = name
         self.cell_start_x = cell_start_x
         self.cell_start_y = cell_start_y
-        self.cell_current_x = cell_start_x
-        self.cell_current_y = cell_start_y
+        self.cell_current_x = init_x
+        self.cell_current_y = init_y
         self.client_count = 0
         self.total_served_client_count = 0
         self.dest_description = ROBOT_STATUSES['NO_TASKS']
@@ -37,7 +37,8 @@ class Robot(sprite.Sprite):
 
         self.image = Surface((WIDTH, HEIGHT))
         self.image = image.load("static/Robot-icon_22_22.png")
-        self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
+        # self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
+        self.rect = Rect(init_x*CELL_SIZE, init_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
 
         self.current_task = None
