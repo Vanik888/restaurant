@@ -140,23 +140,51 @@ def main():
 
     START_CELL_X = 2
     START_CELL_Y = 2
-    table1 = Table(3, 3, CELL_SIZE)
-    table2 = Table(5, 8, CELL_SIZE)
-    table3 = Table(5, 11, CELL_SIZE)
-    table4 = Table(10, 5, CELL_SIZE)
-    table5 = Table(10, 8, CELL_SIZE)
-    table6 = Table(10, 11, CELL_SIZE)
-    table7 = Table(15, 5, CELL_SIZE)
-    table8 = Table(15, 8, CELL_SIZE)
-    table9 = Table(15, 11, CELL_SIZE)
-    tables = [table1, table2, table3, table4, table5, table6, table7, table8, table9]
+    table1 = Table(3, 24, CELL_SIZE)
+    table2 = Table(3, 20, CELL_SIZE)
+    table3 = Table(3, 16, CELL_SIZE)
+    table4 = Table(3, 12, CELL_SIZE)
+    table5 = Table(7, 24, CELL_SIZE)
+    table6 = Table(7, 20, CELL_SIZE)
+    table7 = Table(7, 16, CELL_SIZE)
+    table8 = Table(7, 12, CELL_SIZE)
+
+    # ряд1
+    table9 = Table(15, 7, CELL_SIZE)
+    table10 = Table(20, 7, CELL_SIZE)
+    table11 = Table(25, 7, CELL_SIZE)
+    table12 = Table(30, 7, CELL_SIZE)
+
+    # ряд2
+    table13 = Table(15, 12, CELL_SIZE)
+    table14 = Table(20, 12, CELL_SIZE)
+    table15 = Table(25, 12, CELL_SIZE)
+    table16 = Table(30, 12, CELL_SIZE)
+
+    # ряд3
+    table17 = Table(15, 17, CELL_SIZE)
+    table18 = Table(20, 17, CELL_SIZE)
+    table19 = Table(25, 17, CELL_SIZE)
+    table20 = Table(30, 17, CELL_SIZE)
+
+    # ряд4
+    table21 = Table(15, 22, CELL_SIZE)
+    table22 = Table(20, 22, CELL_SIZE)
+    table23 = Table(25, 22, CELL_SIZE)
+    table24 = Table(30, 22, CELL_SIZE)
+
+    tables = [table1, table2, table3, table4, table5, table6, table7, table8,
+              table9, table10, table11, table12,
+              table13, table14, table15, table16,
+              table17, table18, table19, table20,
+              table21, table22, table23, table24,]
     busy_tables = []
     meals_queue = []
     cooking_meals = []
 
     chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
-    people_julia = People('Julia', 5, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
-    people_anna = People('ANNA', 9, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers)
+    people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     peoples = [people_julia, people_anna]
 
     robot1 = Robot('r1', START_CELL_X, START_CELL_Y, tables, CART_WIDTH, CART_HEIGHT, barriers)
