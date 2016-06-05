@@ -38,6 +38,7 @@ class DynamicElement():
                 entities.remove(t)
 
     def set_trajectory(self, entities):
+        print("%s: set trajectory" % self.name)
         self.trajectory = []
         for p in self.path:
             self.trajectory.append(PathCell(p.x, p.y, CELL_SIZE, self.trajectory_color))
@@ -48,8 +49,6 @@ class DynamicElement():
         entities.empty()
         for t in self.trajectory:
             entities.add(t)
-        for e in entities.sprites():
-            print e
         for e in high_priority_elements:
             entities.add(e)
 
@@ -68,7 +67,7 @@ class DynamicElement():
         self.remove_trajectory_images(entities)
         if len(self.path) > 0:
             next_cell = self.path.pop(0)
-            print(next_cell.x, next_cell.y)
+            print("%s: next_x= %s, next_y=%s" % (self.name, next_cell.x, next_cell.y))
             if (od.is_clear(next_cell.x, next_cell.y)):
                 self.rect.x = next_cell.x * CELL_SIZE
                 self.rect.y = next_cell.y * CELL_SIZE
@@ -85,11 +84,16 @@ class DynamicElement():
                     print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
             else:
                 if not od.no_robots(next_cell.x, next_cell.y):
+
                     print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
                     print('%s: skip the step' % (self.name))
+                    self.path.append(next_cell)
+                    self.tasks.append(self.current_task)
                 elif not od.no_peoples(next_cell.x, next_cell.y):
                     print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
                     print('%s: skip the step' % (self.name))
+                    self.path.append(next_cell)
+                    self.tasks.append(self.current_task)
 
 
     # принтим старый путь и новый

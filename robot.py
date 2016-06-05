@@ -24,8 +24,8 @@ class Robot(sprite.Sprite, DynamicElement):
         self.name = name
         self.cell_start_x = cell_start_x
         self.cell_start_y = cell_start_y
-        self.cell_current_x = init_x
-        self.cell_current_y = init_y
+        self.cell_current_x = cell_start_x
+        self.cell_current_y = cell_start_y
         self.client_count = 0
         self.total_served_client_count = 0
         self.dest_description = ROBOT_STATUSES['NO_TASKS']
@@ -38,9 +38,11 @@ class Robot(sprite.Sprite, DynamicElement):
         self.yvel = 0 # скорость вертикального перемещения
 
         self.image = Surface((WIDTH, HEIGHT))
+        self.image.fill(trajectory_color)
         self.image = image.load("static/Robot-icon_22_22.png")
+
         # self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
-        self.rect = Rect(init_x*CELL_SIZE, init_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
+        self.rect = Rect(cell_start_x*CELL_SIZE, cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
 
         self.current_task = None
@@ -69,6 +71,7 @@ class Robot(sprite.Sprite, DynamicElement):
 
     # идем за едой
     def get_waiting_meal(self, *args, **kwargs):
+        print("%s: get waiting meal" % self.name)
         meals_queue = kwargs['meals_queue']
         if len(meals_queue) > 0:
             self.meal = meals_queue.pop(0)
@@ -106,7 +109,7 @@ class Robot(sprite.Sprite, DynamicElement):
 
     # выполняем задачу
     def execute(self, *args, **kwargs):
-        print('%s: execute task' % self.name)
+        print('%s: execute task: %s' % (self.name, self.tasks))
         if len(self.tasks) > 0:
             self.current_task = self.tasks.pop()
             self.current_task(*args, **kwargs)
@@ -116,6 +119,7 @@ class Robot(sprite.Sprite, DynamicElement):
 
     # выбираем стол, к которому подойти
     def get_waiting_table(self, *args, **kwargs):
+        print("%s: get the table to move" % self.name)
         tables_queue = kwargs['tables_queue']
         if len(tables_queue) > 0:
             self.table = tables_queue.pop(0)
@@ -126,6 +130,7 @@ class Robot(sprite.Sprite, DynamicElement):
     def set_path_to_table(self, *args, **kwargs):
         entities = kwargs['entities']
         destination = self.table.get_stay_point()
+        print("%s: set the path to table (%s, %s)" % (self.name, destination[0], destination[1]))
         self.set_path(*destination, entities=entities)
 #        self.dest_description = ON_CLIENT
         self.tasks.append(self.move_to_table)
@@ -143,6 +148,7 @@ class Robot(sprite.Sprite, DynamicElement):
 
     # общаемся с клиентом
     def conversation(self, *args, **kwargs):
+        print("%s: check conversation" % self.name)
         cooking_meals = kwargs['cooking_meals']
         self.conversation_count += 1
         # поговорили => берем новую задачу
@@ -153,6 +159,7 @@ class Robot(sprite.Sprite, DynamicElement):
                 # свободны для других задач
                 self.dest_description = ROBOT_STATUSES['NO_TASKS']
                 cooking_meals.append(self.table.order)
+                print("%s: add meal %s to cooks queue" % (self.name, self.table.order))
             elif self.table.status == TABLE_STATUSES['WAITING_MEAL']:
                 self.table.set_status(TABLE_STATUSES['EATING'])
                 # свободны для других задач
@@ -165,9 +172,10 @@ class Robot(sprite.Sprite, DynamicElement):
             print('%s: get next task' % self.name)
         else:
             self.tasks.append(self.conversation)
-            print('%s: make conversation' % self.name)
+            print('%s: continue conversation' % self.name)
 
     def update_task(self, *args, **kwargs):
+        print("%s: update task:" % self.name)
         tables_queue = kwargs['tables_queue']
         meals_queue = kwargs['meals_queue']
         # нечего делать => идем на базу

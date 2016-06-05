@@ -207,6 +207,8 @@ def main():
 
     robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
     robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
+    robot3 = Robot('r3', 17, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
+    robot4 = Robot('r4', 16, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
     # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -217,7 +219,7 @@ def main():
     ##to_remove
     # robot1.set_path(4,6)
     # robot2.set_path(2,3)
-    robots = [robot1, robot2]
+    robots = [robot1, robot2, robot3, robot4]
     paths = []
     OD = ObstaclesDefiner(robots=robots, peoples=peoples)
 

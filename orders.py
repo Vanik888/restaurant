@@ -16,7 +16,7 @@ class AbstractOrder(object):
         return self.__str__()
 
     def __str__(self):
-        return str("Table = %s Wait time = %s" % (self.table, self.wait_time))
+        return str("Table = (%s, %s) Wait time = %s" % (self.table.cell_x,self.table.cell_y , self.wait_time))
 
 
 class Lanch(AbstractOrder):

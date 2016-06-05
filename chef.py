@@ -12,5 +12,6 @@ class Chef():
             m.cook()
             if m.is_ready:
                 self.meals_queue.append(m)
+                print("chef: %s: meal is ready" % m)
             else:
                 self.cooking_meals.append(m)

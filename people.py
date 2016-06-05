@@ -182,9 +182,7 @@ class People(sprite.Sprite, DynamicElement):
         tables_queue = kwargs['tables_queue']
         # еще не делали заказ и уже за столом=> зовем официанта
         if self.status == PEOPLE_STATUSES['JUST_CAME'] and (self.cell_current_x, self.cell_current_y) == self.table.get_sit_point():
-            print('call waitress')
-            print('self table people')
-            print(self.table)
+            print('%s: call waitress first time' % self.name)
             self.status = PEOPLE_STATUSES['WAITING_TO_MAKE_ORDER']
             self.table.set_status(TABLE_STATUSES['WAITING_TO_MAKE_ORDER'])
             self.table.order = Lanch(self.table)
