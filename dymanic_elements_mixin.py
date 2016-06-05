@@ -40,7 +40,7 @@ class DynamicElement():
     def set_trajectory(self, entities):
         self.trajectory = []
         for p in self.path:
-            self.trajectory.append(PathCell(p.x, p.y, CELL_SIZE))
+            self.trajectory.append(PathCell(p.x, p.y, CELL_SIZE, self.trajectory_color))
 
         high_priority_elements = []
         for s in entities.sprites():

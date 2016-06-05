@@ -14,6 +14,7 @@ from table import *
 from astar.astar_grid import *
 from chef import Chef
 from time import sleep
+from common_vars import COLORS_TO_DIN_OBJECTS
 
 
 CELL_SIZE = 32
@@ -48,6 +49,17 @@ class ObstaclesDefiner():
         no_peoples = self.no_object(x, y, self.peoples)
         return no_robots and no_peoples
 
+
+class ColorsStorage():
+    def __init__(self):
+        self.count = 0
+
+    def get_color(self):
+        description, color = COLORS_TO_DIN_OBJECTS[self.count]
+        self.count += 1
+        return color
+
+
 def get_static_barriers(level):
     x = 0
     y = 0
@@ -78,6 +90,8 @@ def main():
     bg = Surface((WIN_WIDTH, WIN_HEIGHT)) # Создание видимой поверхности
                                           # будем использовать как фон
     bg.fill(Color(BACKGROUND_COLOR))      # Заливаем поверхность сплошным цветом
+
+    CS = ColorsStorage()                  # Возвращает свободные цвета для траекторий
 
 
 
@@ -186,13 +200,13 @@ def main():
     cooking_meals = []
 
     chef = Chef(cooking_meals=cooking_meals, meals_queue=meals_queue)
-    people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
-    people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
-    people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, entities, pygame, screen )
+    people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
+    people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
+    people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
     peoples = [people_julia, people_anna]
 
-    robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4)
-    robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4)
+    robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
+    robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
     # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)

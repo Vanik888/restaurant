@@ -27,7 +27,7 @@ READY_TO_ORDER = 'ready_to_order'
 
 
 class People(sprite.Sprite, DynamicElement):
-    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, entries, game, screen):
+    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, trajectory_color):
         sprite.Sprite.__init__(self)
         self.name = name
         self.cell_start_x = cell_start_x
@@ -62,10 +62,8 @@ class People(sprite.Sprite, DynamicElement):
                       ]
         self.table = None
         self.eat_time = 3
+        self.trajectory_color = trajectory_color
 
-        self.entries = entries
-        self.game = game
-        self.screen = screen
         self.trajectory = None
         self.trajectory_changed = False
 

@@ -2,18 +2,7 @@
 
 from pygame import *
 
-from common_vars import TABLE_STATUSES
-
-
-COLORS = {
-    'BLUE':        (0, 0, 255),
-    'RED':         (255, 0, 0),
-    'ORANGE':      (230, 140, 20),
-    'YELLOW':      (240, 255, 0),
-    'PURPLE':      (180, 55, 220),
-    'PINK':        (255, 100, 100),
-    'TRANSPARENT': (0, 0, 0),
-}
+from common_vars import TABLE_STATUSES, COLORS
 
 
 colors_for_statuses = {

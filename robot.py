@@ -19,7 +19,7 @@ COLOR = "#888888"
 
 
 class Robot(sprite.Sprite, DynamicElement):
-    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, init_x, init_y):
+    def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, init_x, init_y, trajectory_color):
         sprite.Sprite.__init__(self)
         self.name = name
         self.cell_start_x = cell_start_x
@@ -48,6 +48,7 @@ class Robot(sprite.Sprite, DynamicElement):
         self.table = None
         self.conversation_limit = 5
         self.conversation_count = 0
+        self.trajectory_color = trajectory_color
 
 
     def on_client(self):
