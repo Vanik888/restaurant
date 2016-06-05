@@ -95,14 +95,14 @@ class People(sprite.Sprite):
                         graph[nodes[x][y]].append(nodes[x+i][y+j])
         return graph, nodes
 
-    def set_path(self, cell_end_x, cell_end_y, dyn_obstacles=[]):
+    def set_path(self, cell_end_x, cell_end_y, dyn_obstacles=[], entities=[]):
         graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers, dyn_obstacles)
         paths = AStarGrid(graph)
         self.path = paths.search(
             nodes[self.cell_current_x][self.cell_current_y],
             nodes[cell_end_x][cell_end_y]
         )
-
+        self.set_trajectory(entities)
         self.path.pop(0)
 
     def remove_trajectory_images(self, entities):
@@ -171,8 +171,8 @@ class People(sprite.Sprite):
         print("%s: len=%s" % (self.name, str(len(self.path))))
         destination = self.path[len(self.path)-1].get_cart_coordinates()
         old_path = self.path
-        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
-        self.set_trajectory(entities)
+        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)], entities=entities)
+
         new_path = self.path
         self.print_path_diff(old_path, new_path)
 
@@ -184,21 +184,12 @@ class People(sprite.Sprite):
         print('%s: new path: %s' % (self.name, str(new_path)))
 
 
-    def set_path_to_base(self):
-        destination = (self.cell_start_x, self.cell_start_y)
-        self.set_path(*destination)
-        self.dest_description = ON_BASE
-
-    def get_next_client(self, client):
-        destination = client.get_stay_point()
-        self.client_destination = destination
-        self.set_path(*destination)
-        self.dest_description = ON_CLIENT
 
     # заняли столик
     def get_free_table(self, *args, **kwargs):
         tables = kwargs['tables']
         busy_tables = kwargs['busy_tables']
+        entities = kwargs['entities']
         free_tables = {}
         for t in tables:
             if t not in busy_tables:
@@ -212,15 +203,15 @@ class People(sprite.Sprite):
             busy_tables.append(t)
             self.table = t
             # установили путь до стола
-            self.set_path_to_table()
+            self.set_path_to_table(entities)
             return
         print('%s: all tables are busy' % self.name)
         self.tasks.append(self.get_free_table)
 
     # засетили путь до стола
-    def set_path_to_table(self):
+    def set_path_to_table(self, entities):
         destination = self.table.get_sit_point()
-        self.set_path(*destination)
+        self.set_path(*destination, entities=entities)
         self.dest_description = ON_TABLE
 
     # шагаем до стола
@@ -283,14 +274,15 @@ class People(sprite.Sprite):
     # идем на базовую точку, чистим стол
     def get_out(self, *args, **kwargs):
         print('%s goes to out' % self.name)
-        self.set_path_to_out()
+        entities = kwargs['entities']
+        self.set_path_to_out(entities)
         self.table.set_status(TABLE_STATUSES['NOT_READY'])
 
     # устанавливаем путь до отхода
-    def set_path_to_out(self):
+    def set_path_to_out(self, entities):
         destination = (self.cell_start_x, self.cell_start_y)
         print("out x=%s, y=%s" % destination)
-        self.set_path(*destination)
+        self.set_path(*destination, entities=entities)
         self.dest_description = ON_OUT
 
 
