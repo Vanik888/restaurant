@@ -98,20 +98,20 @@ class Robot(sprite.Sprite):
                 self.cell_current_y = next_cell.y
             # не последний шаг и есть препятствия => перестраиваем маршрут
             elif len(self.path) != 0:
-                print('current state is  (x=%s; y=%s)' %(self.cell_current_x, self.cell_current_y))
+                print('%s: current state is  (x=%s; y=%s)' % (self.name, self.cell_current_x, self.cell_current_y))
                 if not od.no_robots(next_cell.x, next_cell.y):
-                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
                     self.update_path(next_cell.x, next_cell.y)
                 elif not od.no_peoples(next_cell.x, next_cell.y):
                     self.update_path(next_cell.x, next_cell.y)
-                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
+                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
             else:
                 if not od.no_robots(next_cell.x, next_cell.y):
-                    print('there are robot on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-                    print('skip the step')
+                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
+                    print('%s: skip the step' % (self.name))
                 elif not od.no_peoples(next_cell.x, next_cell.y):
-                    print('there are people on (x=%s; y=%s)' % (next_cell.x, next_cell.y))
-                    print('skip the step')
+                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
+                    print('%s: skip the step' % (self.name))
 
 
     # создаем новый путь с учетом препятствия x, y
@@ -126,8 +126,8 @@ class Robot(sprite.Sprite):
     def print_path_diff(self, old_path, new_path):
         old_path = [(p.x, p.y)for p in old_path]
         new_path = [(p.x, p.y)for p in new_path]
-        print('sold path: ' + str(old_path))
-        print('new path: ' + str(new_path))
+        print('%s: old path: %s' % (self.name, str(old_path)))
+        print('%s: new path: %s' % (self.name, str(new_path)))
 
 
 

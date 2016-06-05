@@ -84,6 +84,7 @@ def main():
 
     timer = pygame.time.Clock()
     entities = pygame.sprite.Group() # Все объекты
+    trajectory_entities = pygame.sprite.Group()
     platforms = [] # то, во что мы будем врезаться или опираться
 
 
@@ -235,9 +236,10 @@ def main():
             pygame.display.update()
             screen.blit(bg, (0, 0))
         for p in peoples:
-            p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=entities)
-            p.draw_path(entities)
+            p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=trajectory_entities)
+            trajectory_entities.draw(screen)
             entities.draw(screen)
+
             pygame.display.update()
             screen.blit(bg, (0, 0))
 

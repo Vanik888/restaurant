@@ -10,6 +10,7 @@ from astar.astar_grid import *
 from common_vars import TABLE_STATUSES, PEOPLE_STATUSES
 from orders import Lanch
 from path_cell import PathCell
+from robot import Robot
 
 
 CELL_SIZE = 32
@@ -102,29 +103,29 @@ class People(sprite.Sprite):
             nodes[cell_end_x][cell_end_y]
         )
 
-        self.set_trajectory()
-
         self.path.pop(0)
 
     def remove_trajectory_images(self, entities):
-        for c in self.trajectory:
-            entities.remove(c)
+        if self.trajectory:
+            for t in self.trajectory:
+                entities.remove(t)
 
-    def draw_path(self, entities):
-        if self.path is not None:
-            if self.trajectory_changed:
-                for c in self.trajectory:
-                    entities.add(c)
-            else:
-                for c in self.trajectory:
-                    entities.remove(c)
-
-
-    def set_trajectory(self):
+    def set_trajectory(self, entities):
         self.trajectory = []
-        self.trajectory_changed = True
         for p in self.path:
             self.trajectory.append(PathCell(p.x, p.y, CELL_SIZE))
+
+        high_priority_elements = []
+        for s in entities.sprites():
+            high_priority_elements.append(s)
+        entities.empty()
+        for t in self.trajectory:
+            entities.add(t)
+        for e in entities.sprites():
+            print e
+        for e in high_priority_elements:
+            entities.add(e)
+
 
     def on_client(self):
         return (self.cell_current_x, self.cell_current_y) == self.client_destination
@@ -136,7 +137,8 @@ class People(sprite.Sprite):
         return self.cell_current_x, self.cell_current_y
 
     def make_step(self, od, entities):
-        self.trajectory_changed = False
+        # self.trajectory_changed = False
+        self.remove_trajectory_images(entities)
         if len(self.path) > 0:
             next_cell = self.path.pop(0)
             print(next_cell.x, next_cell.y)
@@ -157,10 +159,10 @@ class People(sprite.Sprite):
             else:
                 if not od.no_robots(next_cell.x, next_cell.y):
                     print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-                    print('%s: skip the step')
+                    print('%s: skip the step' % (self.name))
                 elif not od.no_peoples(next_cell.x, next_cell.y):
                     print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-                    print('%s: skip the step')
+                    print('%s: skip the step' % (self.name))
 
 
      # создаем новый путь с учетом препятствия x, y
@@ -168,9 +170,9 @@ class People(sprite.Sprite):
         print("%s: dest is (x=%s, y=%s)" % (self.name, self.path[0].get_cart_coordinates()[0], self.path[0].get_cart_coordinates()[1]))
         print("%s: len=%s" % (self.name, str(len(self.path))))
         destination = self.path[len(self.path)-1].get_cart_coordinates()
-        self.remove_trajectory_images(entities)
         old_path = self.path
         self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
+        self.set_trajectory(entities)
         new_path = self.path
         self.print_path_diff(old_path, new_path)
 
@@ -178,8 +180,8 @@ class People(sprite.Sprite):
     def print_path_diff(self, old_path, new_path):
         old_path = [(p.x, p.y)for p in old_path]
         new_path = [(p.x, p.y)for p in new_path]
-        print('sold path: ' + str(old_path))
-        print('new path: ' + str(new_path))
+        print('%s: old path: %s' % (self.name, str(old_path)))
+        print('%s: new path: %s' % (self.name, str(new_path)))
 
 
     def set_path_to_base(self):
