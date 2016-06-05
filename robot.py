@@ -8,6 +8,8 @@ from astar.astar_grid import *
 
 from common_vars import TABLE_STATUSES
 from common_vars import ROBOT_STATUSES
+from dymanic_elements_mixin import DynamicElement
+
 
 CELL_SIZE = 32
 MOVE_SPEED = CELL_SIZE
@@ -16,7 +18,7 @@ HEIGHT = CELL_SIZE
 COLOR = "#888888"
 
 
-class Robot(sprite.Sprite):
+class Robot(sprite.Sprite, DynamicElement):
     def __init__(self, name, cell_start_x, cell_start_y, tables, cart_field_width, cart_field_height, barriers, init_x, init_y):
         sprite.Sprite.__init__(self)
         self.name = name
@@ -47,37 +49,6 @@ class Robot(sprite.Sprite):
         self.conversation_limit = 5
         self.conversation_count = 0
 
-    def get_tables_area(self):
-        tables_area = []
-        for t in self.tables:
-            tables_area += t.get_table_area()
-        return tables_area
-
-    def make_graph(self, width, height, barriers, dyn_obstacles=[]):
-        tables_area = self.get_tables_area()
-        nodes = [[AStarGridNode(x, y) for y in range(height)] for x in range(width)]
-        graph = {}
-        for x, y in product(range(width), range(height)):
-            if (x, y) not in barriers + tables_area + dyn_obstacles:
-                node = nodes[x][y]
-                graph[node] = []
-                for i, j in product([-1, 0, 1], [-1, 0, 1]):
-                    if not (0 <= x + i < width):
-                        continue
-                    if not (0 <= y + j < height):
-                        continue
-                    if not (x+i,y+j) in barriers + tables_area + dyn_obstacles:
-                        graph[nodes[x][y]].append(nodes[x+i][y+j])
-        return graph, nodes
-
-    def set_path(self, cell_end_x, cell_end_y, dyn_obstacles=[]):
-        graph, nodes = self.make_graph(self.cart_field_width, self.cart_field_height, self.barriers, dyn_obstacles)
-        paths = AStarGrid(graph)
-        self.path = paths.search(
-            nodes[self.cell_current_x][self.cell_current_y],
-            nodes[cell_end_x][cell_end_y]
-        )
-        self.path.pop(0)
 
     def on_client(self):
         return (self.cell_current_x, self.cell_current_y) == self.client_destination
@@ -88,53 +59,11 @@ class Robot(sprite.Sprite):
     def get_current_pos(self):
         return self.cell_current_x, self.cell_current_y
 
-    def make_step(self, od):
-        if len(self.path) > 0:
-            next_cell = self.path.pop(0)
-            if (od.is_clear(next_cell.x, next_cell.y)):
-                self.rect.x = next_cell.x * CELL_SIZE
-                self.rect.y = next_cell.y * CELL_SIZE
-                self.cell_current_x = next_cell.x
-                self.cell_current_y = next_cell.y
-            # не последний шаг и есть препятствия => перестраиваем маршрут
-            elif len(self.path) != 0:
-                print('%s: current state is  (x=%s; y=%s)' % (self.name, self.cell_current_x, self.cell_current_y))
-                if not od.no_robots(next_cell.x, next_cell.y):
-                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-                    self.update_path(next_cell.x, next_cell.y)
-                elif not od.no_peoples(next_cell.x, next_cell.y):
-                    self.update_path(next_cell.x, next_cell.y)
-                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-            else:
-                if not od.no_robots(next_cell.x, next_cell.y):
-                    print('%s: there are robot on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-                    print('%s: skip the step' % (self.name))
-                elif not od.no_peoples(next_cell.x, next_cell.y):
-                    print('%s: there are people on (x=%s; y=%s)' % (self.name, next_cell.x, next_cell.y))
-                    print('%s: skip the step' % (self.name))
-
-
-    # создаем новый путь с учетом препятствия x, y
-    def update_path(self, obstacle_x, obstacle_y):
-        destination = self.path[0].get_cart_coordinates()
-        old_path = self.path
-        self.set_path(*destination, dyn_obstacles=[(obstacle_x, obstacle_y)])
-        new_path = self.path
-        self.print_path_diff(old_path, new_path)
-
-    # принтим старый путь и новый
-    def print_path_diff(self, old_path, new_path):
-        old_path = [(p.x, p.y)for p in old_path]
-        new_path = [(p.x, p.y)for p in new_path]
-        print('%s: old path: %s' % (self.name, str(old_path)))
-        print('%s: new path: %s' % (self.name, str(new_path)))
-
-
-
 
     def set_path_to_base(self, *args, **kwargs):
+        entities = kwargs['entities']
         destination = (self.cell_start_x, self.cell_start_y)
-        self.set_path(*destination)
+        self.set_path(*destination, entities=entities)
         self.tasks.append(self.move_to_base)
 
     # идем за едой
@@ -154,17 +83,12 @@ class Robot(sprite.Sprite):
                 self.tasks.append(self.set_path_to_table)
                 self.tasks.append(self.set_path_to_base)
 
-
-        # destination = (self.cell_start_x, self.cell_start_y)
-        # self.set_path()
-        #
-
-
     def move_to_base(self, *args, **kwargs):
         OD = kwargs['OD']
         tables_queue = kwargs['tables_queue']
         meals_queue = kwargs['meals_queue']
-        self.make_step(OD)
+        entities = kwargs['entities']
+        self.make_step(OD, entities=entities)
 
         # пока шли- появлились заказы или приготовилась
         #  еда и при этом мы не уносим тарелки и не идем за едой
@@ -178,9 +102,6 @@ class Robot(sprite.Sprite):
         else:
             if not self.on_base():
                 self.tasks.append(self.move_to_base)
-
-
-
 
     # выполняем задачу
     def execute(self, *args, **kwargs):
@@ -202,15 +123,17 @@ class Robot(sprite.Sprite):
 
     # сетим путь до стола
     def set_path_to_table(self, *args, **kwargs):
+        entities = kwargs['entities']
         destination = self.table.get_stay_point()
-        self.set_path(*destination)
+        self.set_path(*destination, entities=entities)
 #        self.dest_description = ON_CLIENT
         self.tasks.append(self.move_to_table)
 
     # идем к столу
     def move_to_table(self, *args, **kwargs):
         OD = kwargs['OD']
-        self.make_step(OD)
+        entities = kwargs['entities']
+        self.make_step(OD, entities)
         if len(self.path) > 0:
             self.tasks.append(self.move_to_table)
         # если дошли до стола

@@ -193,7 +193,7 @@ def main():
 
     robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4)
     robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4)
-    robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
+    # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot4 = Robot(START_CELL_X, START_CELL_Y+9, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -203,7 +203,7 @@ def main():
     ##to_remove
     # robot1.set_path(4,6)
     # robot2.set_path(2,3)
-    robots = [robot1, robot2, robot3]
+    robots = [robot1, robot2]
     paths = []
     OD = ObstaclesDefiner(robots=robots, peoples=peoples)
 
@@ -230,8 +230,8 @@ def main():
 
         robots.reverse()
         for robot in robots:
-            robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals)
-            screen.blit(bg, (0, 0))
+            robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=trajectory_entities)
+            trajectory_entities.draw(screen)
             entities.draw(screen)
             pygame.display.update()
             screen.blit(bg, (0, 0))
@@ -239,7 +239,6 @@ def main():
             p.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=trajectory_entities)
             trajectory_entities.draw(screen)
             entities.draw(screen)
-
             pygame.display.update()
             screen.blit(bg, (0, 0))
 
