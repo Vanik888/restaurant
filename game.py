@@ -266,10 +266,10 @@ def main():
         p = People(name, peoples_start_point[0],peoples_start_point[1], tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
         new_peoples.append(p)
 
-    robot1 = Robot('r1', 14, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
-    robot2 = Robot('r2', 16, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
-    robot3 = Robot('r3', 17, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
-    robot4 = Robot('r4', 16, 6, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
+    robot1 = Robot('r1', 17, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
+    robot2 = Robot('r2', 18, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
+    robot3 = Robot('r3', 19, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
+    robot4 = Robot('r4', 20, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
 
     # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
