@@ -230,12 +230,22 @@ def main():
     people_julia = People('Julia', 8, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
     people_anna = People('ANNA', 10, 3, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
     people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
-    peoples = [people_julia, people_anna]
+    # peoples = [people_julia, people_anna]
+
+    peoples_count = 3
+    new_peoples = []
+    peoples = []
+    peoples_start_point = (1, 3)
+    for k in range(0, peoples_count):
+        name = 'client_' + str(k)
+        p = People(name, peoples_start_point[0],peoples_start_point[1], tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
+        new_peoples.append(p)
 
     robot1 = Robot('r1', 14, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
     robot2 = Robot('r2', 16, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
     robot3 = Robot('r3', 17, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
     robot4 = Robot('r4', 16, 6, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
+
     # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
@@ -256,9 +266,8 @@ def main():
         entities.add(table)
     for robot in robots:
         entities.add(robot)
-    for people in peoples:
-        entities.add(people)
-
+    # for people in peoples:
+    #     entities.add(people)
 
 
     while 1: # Основной цикл программы
@@ -272,6 +281,14 @@ def main():
 
 
         robots.reverse()
+        if OD.is_clear(*peoples_start_point) and new_peoples:
+            p = new_peoples.pop(0)
+            peoples.append(p)
+            entities.add(p)
+            print('main: added people %s' % p.name)
+
+
+
         for robot in robots:
             robot.execute(OD=OD, tables=tables, busy_tables=busy_tables, tables_queue=tables_queue, meals_queue=meals_queue, cooking_meals=cooking_meals, entities=trajectory_entities)
             trajectory_entities.draw(screen)
