@@ -15,15 +15,15 @@ from astar.astar_grid import *
 from chef import Chef
 from time import sleep
 from common_vars import COLORS_TO_DIN_OBJECTS
-
+from common_vars import COLORS
 
 CELL_SIZE = 32
-CART_WIDTH = 40
-CART_HEIGHT = 28
+CART_WIDTH = 38
+CART_HEIGHT = 24
 WIN_WIDTH = CART_WIDTH * CELL_SIZE
 WIN_HEIGHT = CART_HEIGHT * CELL_SIZE
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
-BACKGROUND_COLOR = "#004000"
+BACKGROUND_COLOR = COLORS['WHITE']
 
 
 class ObstaclesDefiner():
@@ -89,7 +89,7 @@ def main():
     pygame.display.set_caption("Robot field") # Пишем в шапку
     bg = Surface((WIN_WIDTH, WIN_HEIGHT)) # Создание видимой поверхности
                                           # будем использовать как фон
-    bg.fill(Color(BACKGROUND_COLOR))      # Заливаем поверхность сплошным цветом
+    bg.fill(BACKGROUND_COLOR)      # Заливаем поверхность сплошным цветом
 
     CS = ColorsStorage()                  # Возвращает свободные цвета для траекторий
 
@@ -153,48 +153,75 @@ def main():
               "-           -                          -",
               "----------------------------------------"
               ]
+
+    level = [ "--------------------------------------",
+              "-    -       -                       -",
+              "-            -                       -",
+              "-            -                       -",
+              "-            -------------------------",
+              "-                                    -",
+              "-    -                               -",
+              "------                               -",
+              "-            --------------------    -",
+              "-                                    -",
+              "-                                    -",
+              "-                                    -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "-           -                        -",
+              "----------------------------------------"
+              ]
+
     barriers = get_static_barriers(level)
 
     START_CELL_X = 14
     START_CELL_Y = 4
-    table1 = Table(3, 24, CELL_SIZE)
-    table2 = Table(3, 20, CELL_SIZE)
-    table3 = Table(3, 16, CELL_SIZE)
-    table4 = Table(3, 12, CELL_SIZE)
-    table5 = Table(7, 24, CELL_SIZE)
-    table6 = Table(7, 20, CELL_SIZE)
-    table7 = Table(7, 16, CELL_SIZE)
-    table8 = Table(7, 12, CELL_SIZE)
+    # table1 = Table(3, 24, CELL_SIZE)
+    table2 = Table(3, 18, CELL_SIZE)
+    table3 = Table(3, 14, CELL_SIZE)
+    table4 = Table(3, 10, CELL_SIZE)
+    # table5 = Table(7, 24, CELL_SIZE)
+    table6 = Table(7, 18, CELL_SIZE)
+    table7 = Table(7, 14, CELL_SIZE)
+    table8 = Table(7, 10, CELL_SIZE)
 
     # ряд1
-    table9 = Table(15, 7, CELL_SIZE)
-    table10 = Table(20, 7, CELL_SIZE)
-    table11 = Table(25, 7, CELL_SIZE)
-    table12 = Table(30, 7, CELL_SIZE)
+    table9 = Table(15, 9, CELL_SIZE)
+    table10 = Table(20, 9, CELL_SIZE)
+    table11 = Table(25, 9, CELL_SIZE)
+    table12 = Table(30, 9, CELL_SIZE)
 
     # ряд2
-    table13 = Table(15, 12, CELL_SIZE)
-    table14 = Table(20, 12, CELL_SIZE)
-    table15 = Table(25, 12, CELL_SIZE)
-    table16 = Table(30, 12, CELL_SIZE)
+    table13 = Table(15, 14, CELL_SIZE)
+    table14 = Table(20, 14, CELL_SIZE)
+    table15 = Table(25, 14, CELL_SIZE)
+    table16 = Table(30, 14, CELL_SIZE)
 
     # ряд3
-    table17 = Table(15, 17, CELL_SIZE)
-    table18 = Table(20, 17, CELL_SIZE)
-    table19 = Table(25, 17, CELL_SIZE)
-    table20 = Table(30, 17, CELL_SIZE)
+    table17 = Table(15, 19, CELL_SIZE)
+    table18 = Table(20, 19, CELL_SIZE)
+    table19 = Table(25, 19, CELL_SIZE)
+    table20 = Table(30, 19, CELL_SIZE)
 
     # ряд4
-    table21 = Table(15, 22, CELL_SIZE)
-    table22 = Table(20, 22, CELL_SIZE)
-    table23 = Table(25, 22, CELL_SIZE)
-    table24 = Table(30, 22, CELL_SIZE)
+    table21 = Table(15, 24, CELL_SIZE)
+    table22 = Table(20, 24, CELL_SIZE)
+    table23 = Table(25, 24, CELL_SIZE)
+    table24 = Table(30, 24, CELL_SIZE)
 
-    tables = [table1, table2, table3, table4, table5, table6, table7, table8,
+    tables = [table4, table2, table3, table8, table6, table7,
               table9, table10, table11, table12,
               table13, table14, table15, table16,
               table17, table18, table19, table20,
-              table21, table22, table23, table24,]
+              ]
     busy_tables = []
     meals_queue = []
     cooking_meals = []
@@ -205,10 +232,10 @@ def main():
     people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
     peoples = [people_julia, people_anna]
 
-    robot1 = Robot('r1', 14, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
-    robot2 = Robot('r2', 16, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
-    robot3 = Robot('r3', 17, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
-    robot4 = Robot('r4', 16, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
+    robot1 = Robot('r1', 14, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 10, 4, CS.get_color())
+    robot2 = Robot('r2', 16, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,4, CS.get_color())
+    robot3 = Robot('r3', 17, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5, CS.get_color())
+    robot4 = Robot('r4', 16, 6, tables, CART_WIDTH, CART_HEIGHT, barriers, 12,5, CS.get_color())
     # robot3 = Robot('r3', 20, 4, tables, CART_WIDTH, CART_HEIGHT, barriers, 11,5)
     # robot2 = Robot('r2', START_CELL_X, START_CELL_Y+3, tables, CART_WIDTH, CART_HEIGHT, barriers)
     # robot3 = Robot(START_CELL_X, START_CELL_Y+6, tables, CART_WIDTH, CART_HEIGHT, barriers)
