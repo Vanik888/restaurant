@@ -39,7 +39,8 @@ class Robot(sprite.Sprite, DynamicElement):
 
         self.image = Surface((WIDTH, HEIGHT))
         self.image.fill(trajectory_color)
-        self.image = image.load("static/Robot-icon_22_22.png")
+        # self.image = image.load("static/Robot-icon_22_22.png")
+        self.image = image.load("static/robot_25_25.png")
 
         # self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.rect = Rect(cell_start_x*CELL_SIZE, cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект

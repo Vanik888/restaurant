@@ -3,6 +3,7 @@
 
 import operator
 from itertools import product
+import random
 
 from pygame import *
 from astar.astar_grid import *
@@ -12,6 +13,7 @@ from orders import Lanch
 from path_cell import PathCell
 from robot import Robot
 from dymanic_elements_mixin import DynamicElement
+from common_vars import PEOPLE_IMAGES
 
 
 CELL_SIZE = 32
@@ -44,7 +46,8 @@ class People(sprite.Sprite, DynamicElement):
         self.yvel = 0 # скорость вертикального перемещения
 
         self.image = Surface((WIDTH, HEIGHT))
-        self.image = image.load("static/girl_22_22.png")
+        # self.image = image.load("static/girl_22_22.png")
+        self.image = image.load(random.choice(PEOPLE_IMAGES))
         self.rect = Rect(self.cell_start_x*CELL_SIZE, self.cell_start_y*CELL_SIZE, WIDTH, HEIGHT) # прямоугольный объект
         self.path = None
         self.current_task = None
@@ -71,6 +74,10 @@ class People(sprite.Sprite, DynamicElement):
         self.eat_time -= 1
         return self.eat_time != 0
 
+    def at_home(self):
+        condition = ((self.cell_current_x, self.cell_current_y) == (self.cell_start_x, self.cell_start_y)) and \
+               self.status == PEOPLE_STATUSES['GO_HOME']
+        return condition
 
     def on_base(self):
         return (self.cell_current_x, self.cell_current_y) == (self.cell_start_x, self.cell_start_y)
@@ -174,7 +181,7 @@ class People(sprite.Sprite, DynamicElement):
         destination = (self.cell_start_x, self.cell_start_y)
         print("out x=%s, y=%s" % destination)
         self.set_path(*destination, entities=entities)
-        self.dest_description = ON_OUT
+        self.status = PEOPLE_STATUSES['GO_HOME']
 
 
     # делаем стол красным и кладем задачу в очередь для робота

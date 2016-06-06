@@ -9,8 +9,9 @@ PLATFORM_COLOR = "#FF6262"
 
 
 class Platform(sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, img):
         sprite.Sprite.__init__(self)
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.image = image.load("static/platform.png")
+        self.image = image.load(img)
+        # self.image = image.load("static/wood_2_32_32.png")
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)

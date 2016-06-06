@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import random
 import pygame
 
 from operator import itemgetter
@@ -16,6 +17,8 @@ from chef import Chef
 from time import sleep
 from common_vars import COLORS_TO_DIN_OBJECTS
 from common_vars import COLORS
+from common_vars import BARRIERS_TO_IMAGE
+
 
 CELL_SIZE = 32
 CART_WIDTH = 38
@@ -64,10 +67,49 @@ def get_static_barriers(level):
     x = 0
     y = 0
     barriers = []
+    images = []
     for row in level:
         for col in row:
             if col == "-":
                 barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['-'])
+            # тонкая горизотнальная стена
+            elif col == "/":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['/'])
+            # тонкая вертикальная стена
+            elif col == "1":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['1'])
+            # уголок кирпичный
+            elif col == "2":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['2'])
+            # стол дерево
+            elif col == "3":
+                barriers.append((x, y))
+                key = str(random.sample(xrange(3,5), 1)[0])
+                images.append(BARRIERS_TO_IMAGE[key])
+            # cтена дерево
+            elif col == "5":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['5'])
+            # кассир
+            elif col == "6":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['6'])
+            # обслуга
+            elif col == "7":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['7'])
+
+            elif col == "8":
+                barriers.append((x, y))
+                images.append(BARRIERS_TO_IMAGE['8'])
+
+
+
+
             x += 1
         y += 1
         x = 0
@@ -79,9 +121,20 @@ def get_static_barriers(level):
             if item[0] == i:
                 barriers_row.append(item)
         barriers_array.append(barriers_row)
-    return barriers
+    return barriers, images
 
-
+def get_barriers_images(level):
+    x = 0
+    y = 0
+    images = []
+    for row in level:
+        for col in row:
+            if col == "-":
+                images.append(BARRIERS_TO_IMAGE['-'])
+            x += 1
+        y += 1
+        x = 0
+    return images
 
 def main():
     pygame.init() # Инициация PyGame, обязательная строчка
@@ -124,45 +177,16 @@ def main():
     #        "-                       -",
     #        "-------------------------"]
 
-    level = [ "----------------------------------------",
-              "-            -                         -",
-              "-            -                         -",
-              "-            ---------------------------",
-              "-                                      -",
-              "-                                      -",
-              "-            ---------------------     -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-                                      -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "-           -                          -",
-              "----------------------------------------"
-              ]
 
     level = [ "--------------------------------------",
-              "-    -       -                       -",
-              "-            -                       -",
-              "-            -                       -",
-              "-            -------------------------",
+              "-    1       3                       -",
+              "-            3                       -",
+              "-            3 6  7                  -",
+              "-            338333333333333333333333-",
+              "-    1                               -",
+              "-////2                               -",
               "-                                    -",
-              "-    -                               -",
-              "------                               -",
-              "-            --------------------    -",
+              "-            55555555555555555555    -",
               "-                                    -",
               "-                                    -",
               "-                                    -",
@@ -177,10 +201,11 @@ def main():
               "-           -                        -",
               "-           -                        -",
               "-           -                        -",
-              "----------------------------------------"
+              "--------------------------------------"
               ]
 
-    barriers = get_static_barriers(level)
+    barriers, barriers_images = get_static_barriers(level)
+    # barriers_images = get_barriers_images(level)
 
     START_CELL_X = 14
     START_CELL_Y = 4
@@ -189,9 +214,9 @@ def main():
     table3 = Table(3, 14, CELL_SIZE)
     table4 = Table(3, 10, CELL_SIZE)
     # table5 = Table(7, 24, CELL_SIZE)
-    table6 = Table(7, 18, CELL_SIZE)
-    table7 = Table(7, 14, CELL_SIZE)
-    table8 = Table(7, 10, CELL_SIZE)
+    table6 = Table(8, 18, CELL_SIZE)
+    table7 = Table(8, 14, CELL_SIZE)
+    table8 = Table(8, 10, CELL_SIZE)
 
     # ряд1
     table9 = Table(15, 9, CELL_SIZE)
@@ -232,7 +257,7 @@ def main():
     people_kristy = People('Kristy', 12, 5, tables, CART_WIDTH, CART_HEIGHT, barriers, CS.get_color())
     # peoples = [people_julia, people_anna]
 
-    peoples_count = 3
+    peoples_count = 10
     new_peoples = []
     peoples = []
     peoples_start_point = (1, 3)
@@ -271,13 +296,20 @@ def main():
 
 
     while 1: # Основной цикл программы
-        timer.tick(20)
-        sleep(1)
+        timer.tick(1)
+        # sleep(1)
         screen.blit(bg, (0, 0))      # Каждую итерацию необходимо всё перерисовывать
 
-        for b in barriers:
-            pf = Platform(b[0]*CELL_SIZE, b[1]*CELL_SIZE)
+        for i in xrange(0, len(barriers)):
+            barrier = barriers[i]
+            image = barriers_images[i]
+            pf = Platform(barrier[0]*CELL_SIZE, barrier[1]*CELL_SIZE, image)
             entities.add(pf)
+        # for b in barriers, barriers_images:
+        #     print('image path')
+        #     print(barriers_images[b[0]][b[1]])
+        #     pf = Platform(b[0]*CELL_SIZE, b[1]*CELL_SIZE, barriers_images[b])
+        #     entities.add(pf)
 
 
         robots.reverse()
@@ -287,6 +319,12 @@ def main():
             entities.add(p)
             print('main: added people %s' % p.name)
 
+        for k in range(0, len(peoples)):
+            p = peoples[k]
+            if p.at_home():
+                print('main: remove people %s' % p.name)
+                entities.remove(p)
+                peoples.remove(p)
 
 
         for robot in robots:
